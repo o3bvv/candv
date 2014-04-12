@@ -15,20 +15,14 @@ class Constant(object):
     """
     Base class for all constants.
 
-    :argument str help_text: optional verbose description of the constant
-
     :ivar str name: constant's name. Is set up automatically and equals to the
                     name of container's attribute
-    :ivar str help_text: optional verbose description of the constant.
-                         Default: ``None``
     """
 
     # Tracks each time a Constant instance is created. Used to retain order.
     _creation_counter = 0
 
-    def __init__(self, help_text=None):
-        self.help_text = help_text
-
+    def __init__(self):
         # Container which this constant belongs to. Is set up automatically by
         # container.
         self._container = None
