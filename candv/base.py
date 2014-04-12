@@ -91,7 +91,7 @@ class _ConstantsContainerMeta(type):
             for name, obj in list(six.iteritems(attributes))
             if isinstance(obj, constant_class)
         ]
-        constants.sort(key=lambda (name, obj): obj._creation_counter)
+        constants.sort(key=lambda x: x[1]._creation_counter)
 
         # Finish initialization of constants and store them in internal buffer
         cls._constants = OrderedDict()
