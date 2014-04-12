@@ -6,9 +6,9 @@ candv
 **candv** stands for 'Constants &amp; Values' and it is a Python library for
 creating non-standard constants.
 
-Please, `read the docs <http://candv.readthedocs.org/en/latest/>`_ for information.
-
 Inspired by `Constants from Twisted <http://twistedmatrix.com/documents/current/core/howto/constants.html>`_.
+
+Please, `read the docs <http://candv.readthedocs.org/en/latest/>`_ for information.
 
 .. |Build Status| image:: https://travis-ci.org/oblalex/candv.svg?branch=master
    :target: https://travis-ci.org/oblalex/candv
