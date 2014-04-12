@@ -11,7 +11,16 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+Modules:
 
+.. toctree::
+   :maxdepth: 2
+
+   modules.rst
+
+Project's repository:
+
+    https://github.com/oblalex/candv
 
 Indices and tables
 ==================
