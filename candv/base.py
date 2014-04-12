@@ -152,7 +152,7 @@ class ConstantsContainer(object):
             >>> [x.name for x in FOO.iterconstants()]
             ['foo', 'bar']
         """
-        return cls._constants.itervalues()
+        return six.itervalues(cls._constants)
 
     @classmethod
     def find_by_name(cls, name):
