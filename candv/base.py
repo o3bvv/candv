@@ -130,7 +130,7 @@ class ConstantsContainer(object):
 
     @classmethod
     def names(cls):
-        return cls._constants.keys()
+        return list(cls.internames())
 
     @classmethod
     def internames(cls):
@@ -138,7 +138,7 @@ class ConstantsContainer(object):
 
     @classmethod
     def constants(cls):
-        return cls._constants.values()
+        return list(cls.iterconstants())
 
     @classmethod
     def iterconstants(cls):
@@ -164,7 +164,7 @@ class ConstantsContainer(object):
 
     @classmethod
     def items(cls):
-        return cls._constants.items()
+        return list(cls.iteritems())
 
     @classmethod
     def iteritems(cls):
