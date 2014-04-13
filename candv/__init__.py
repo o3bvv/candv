@@ -31,6 +31,11 @@ class VerboseMixin(object):
         self.help_text = kwargs.pop('help_text', None)
         super(VerboseMixin, self).__init__(*args, **kwargs)
 
+    def _merge_into_group(self, group):
+        super(VerboseMixin, self)._merge_into_group(group)
+        group.verbose_name = self.verbose_name
+        group.help_text = self.help_text
+
 
 class VerboseConstant(VerboseMixin, SimpleConstant):
     """
@@ -72,6 +77,10 @@ class ValueConstant(SimpleConstant):
     def __init__(self, value):
         super(ValueConstant, self).__init__()
         self.value = value
+
+    def _merge_into_group(self, group):
+        super(ValueConstant, self)._merge_into_group(group)
+        group.value = self.value
 
 
 class VerboseValueConstant(VerboseMixin, ValueConstant):

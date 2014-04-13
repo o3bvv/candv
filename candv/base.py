@@ -11,6 +11,41 @@ import six
 from collections import OrderedDict
 
 
+def _constant_repr(full_name):
+    return "<constant '{0}'>".format(full_name)
+
+
+class _LazyConstantsGroup(object):
+
+    def __init__(self, constant, group_class, **group_members):
+        for name, obj in group_members.items():
+            if not isinstance(obj, (Constant, _LazyConstantsGroup)):
+                raise TypeError("{0} cannot be a member of a constants group"
+                                .format(obj.__class__))
+        self.constant = constant
+        self.group_class = group_class
+        self.group_members = group_members
+
+    def _evaluate(self, parent, name):
+        group_class, self.group_class = self.group_class, None
+        group_members, self.group_members = self.group_members, None
+
+        cls_name = "{0}.{1}".format(parent.__name__, name)
+        group_repr = _constant_repr(cls_name)
+
+        group_members.update({
+            '__new__': object.__new__, # Remove singleton protection
+            '__repr__': lambda self: group_repr,
+            '__name__': name,
+            'name': name,
+        })
+
+        cls = type(cls_name, (group_class, ), group_members)
+        group = cls()
+        self.constant._merge_into_group(group)
+        return group
+
+
 class Constant(object):
     """
     Base class for all constants.
@@ -23,32 +58,37 @@ class Constant(object):
     _creation_counter = 0
 
     def __init__(self):
-        # Container which this constant belongs to. Is set up automatically by
-        # container.
+        self.name = None
+        self._repr = ''
         self._container = None
-
-        # Name by which constant can be accessed from containter. Is set up
-        # automatically by container.
-        self._name = None
 
         # Increase the creation counter, and save our local copy.
         self._creation_counter = Constant._creation_counter
         Constant._creation_counter += 1
 
-    def _post_init(self, container, constant_name):
+    def _post_init(self, container, name):
         """
         Called automatically by container after container's class construction.
         """
+        self.name = name
+        self._repr = _constant_repr("{0}.{1}".format(container.__name__, name))
         self._container = container
-        self.name = constant_name
+
+    def to_group(self, group_class, **group_members):
+        return _LazyConstantsGroup(self, group_class, **group_members)
+
+    def _merge_into_group(self, group):
+        """
+        Called automatically by container after group construction.
+        """
+        group._creation_counter = self._creation_counter
 
     def __repr__(self):
         """
         Return text identifying both which constant this is and which
         collection it belongs to.
         """
-        return "<constant '{0}.{1}'>".format(self._container.__name__,
-                                             self.name)
+        return self._repr
 
 
 class _ConstantsContainerMeta(type):
@@ -68,31 +108,23 @@ class _ConstantsContainerMeta(type):
                 "Constant class {0} must be derived from {1}".format(
                  constant_class.__name__, Constant.__name__))
 
-        def verify_object(obj):
-            """
-            Check if constant does not belong to other containers.
-            """
-            if obj._container is None:
-                return obj
-            else:
-                raise ValueError(
-                    "Cannot use {0} as the value of an attribute on {1}"
-                    .format(obj, cls.__name__))
+        constants = []
+        for name, obj in list(six.iteritems(attributes)):
+            if isinstance(obj, _LazyConstantsGroup):
+                new_obj = obj._evaluate(cls, name)
+                del obj.constant
+                setattr(cls, name, new_obj)
+                constants.append((name, new_obj))
+            elif isinstance(obj, constant_class):
+                if obj._container is not None:
+                    raise ValueError(
+                        "Cannot use {0} as the value of an attribute {1} on {2}"
+                        .format(obj, name, cls.__name__))
+                obj._post_init(cls, name)
+                constants.append((name, obj))
 
-        # Get sorted list of container's constants with their names
-        constants = [
-            (name, verify_object(obj), )
-            for name, obj in list(six.iteritems(attributes))
-            if isinstance(obj, constant_class)
-        ]
         constants.sort(key=lambda name_obj: name_obj[1]._creation_counter)
-
-        # Finish initialization of constants and store them in internal buffer
-        cls._constants = OrderedDict()
-        for (name, obj) in constants:
-            obj._post_init(container=cls, constant_name=name)
-            cls._constants[name] = obj
-
+        cls._constants = OrderedDict(constants)
         return cls
 
 

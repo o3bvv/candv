@@ -120,3 +120,60 @@ class ValuesTestCase(unittest.TestCase):
             THREE = ValueConstant(3)
 
         self.assertEquals(list(FOO.itervalues()), [1, 4, 3, ])
+
+
+class GrouppingTestCase(unittest.TestCase):
+
+    def test_simple_group(self):
+
+        class FOO(Constants):
+            A = SimpleConstant()
+            B = SimpleConstant().to_group(Constants,
+                B2=SimpleConstant(),
+                B0=SimpleConstant(),
+                B1=SimpleConstant(),
+            )
+
+        self.assertEquals(FOO.names(), ['A', 'B'])
+        self.assertEquals(FOO.get_by_name('B'), FOO.B)
+        self.assertEquals(repr(FOO.B), "<constant 'FOO.B'>")
+
+        self.assertEquals(FOO.B.names(), ['B2', 'B0', 'B1', ])
+        self.assertEquals(FOO.B.get_by_name('B0'), FOO.B.B0)
+
+    def test_invalid_group(self):
+
+        def define_class():
+            class FOO(Constants):
+                A = SimpleConstant().to_group(Constants,
+                    B=SimpleConstant(),
+                    C=1,
+                )
+
+        self.assertRaises(TypeError, define_class)
+
+
+    def test_verbose_group(self):
+
+        class FOO(Constants):
+            A = SimpleConstant()
+            B = VerboseConstant(
+                verbose_name="Constant B",
+                help_text="Just group with verbose name").to_group(Constants,
+                C=SimpleConstant(),
+                D=SimpleConstant(),
+            )
+
+        self.assertEquals(FOO.B.verbose_name, "Constant B")
+        self.assertEquals(FOO.B.help_text, "Just group with verbose name")
+
+    def test_valuable_group(self):
+
+        class FOO(Constants):
+            A = SimpleConstant()
+            B = ValueConstant(10).to_group(Constants,
+                C=SimpleConstant(),
+                D=SimpleConstant(),
+            )
+
+        self.assertEquals(FOO.B.value, 10)
