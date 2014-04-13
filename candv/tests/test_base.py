@@ -13,7 +13,7 @@ class ConstantsContainerTestCase(unittest.TestCase):
 
         self.assertRaises(TypeError, create_instance)
 
-    def test_iterconstants(self):
+    def _get_foo_class(self):
 
         class FOO(ConstantsContainer):
             constant_class = Constant
@@ -22,13 +22,45 @@ class ConstantsContainerTestCase(unittest.TestCase):
             CONSTANT3 = Constant()
             CONSTANT1 = Constant()
 
-        names = [x.name for x in FOO.iterconstants()]
-        self.assertEquals(names, ['CONSTANT2', 'CONSTANT3', 'CONSTANT1', ])
+        return FOO
 
-    def test_iterconstants_with_no_class(self):
-        self.assertRaises(AttributeError, ConstantsContainer.iterconstants)
+    def test_names(self):
+        FOO = self._get_foo_class()
+        self.assertEquals(FOO.names(), ['CONSTANT2', 'CONSTANT3', 'CONSTANT1'])
 
-    def test_find_by_name(self):
+    def test_iternames(self):
+        FOO = self._get_foo_class()
+        self.assertEquals(list(FOO.internames()), ['CONSTANT2',
+                                                   'CONSTANT3',
+                                                   'CONSTANT1'])
+
+    def test_constants(self):
+        FOO = self._get_foo_class()
+        self.assertEquals(FOO.constants(),
+                          [FOO.CONSTANT2, FOO.CONSTANT3, FOO.CONSTANT1, ])
+
+    def test_iterconstants(self):
+        FOO = self._get_foo_class()
+        self.assertEquals(list(FOO.iterconstants()),
+                          [FOO.CONSTANT2, FOO.CONSTANT3, FOO.CONSTANT1, ])
+
+    def test_items(self):
+        FOO = self._get_foo_class()
+        self.assertEquals(FOO.items(), [('CONSTANT2', FOO.CONSTANT2),
+                                        ('CONSTANT3', FOO.CONSTANT3),
+                                        ('CONSTANT1', FOO.CONSTANT1)])
+
+    def test_iteritems(self):
+        FOO = self._get_foo_class()
+        self.assertEquals(list(FOO.iteritems()), [('CONSTANT2', FOO.CONSTANT2),
+                                                  ('CONSTANT3', FOO.CONSTANT3),
+                                                  ('CONSTANT1', FOO.CONSTANT1)])
+
+    def test_contains(self):
+        FOO = self._get_foo_class()
+        self.assertTrue(FOO.contains('CONSTANT2'))
+
+    def test_get_by_name(self):
 
         class FOO(ConstantsContainer):
             constant_class = Constant
@@ -36,12 +68,8 @@ class ConstantsContainerTestCase(unittest.TestCase):
             CONSTANT2 = Constant()
             CONSTANT1 = Constant()
 
-        self.assertEquals(FOO.find_by_name('CONSTANT2'), FOO.CONSTANT2)
-        self.assertRaises(KeyError, FOO.find_by_name, 'CONSTANT_X')
-
-    def test_find_by_name_with_no_class(self):
-        self.assertRaises(AttributeError,
-                          ConstantsContainer.find_by_name, 'CONSTANT_X')
+        self.assertEquals(FOO.get_by_name('CONSTANT2'), FOO.CONSTANT2)
+        self.assertRaises(KeyError, FOO.get_by_name, 'CONSTANT_X')
 
     def test_invalid_constant_class(self):
 

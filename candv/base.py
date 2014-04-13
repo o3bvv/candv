@@ -85,7 +85,7 @@ class _ConstantsContainerMeta(type):
             for name, obj in list(six.iteritems(attributes))
             if isinstance(obj, constant_class)
         ]
-        constants.sort(key=lambda x: x[1]._creation_counter)
+        constants.sort(key=lambda name_obj: name_obj[1]._creation_counter)
 
         # Finish initialization of constants and store them in internal buffer
         cls._constants = OrderedDict()
@@ -125,6 +125,22 @@ class ConstantsContainer(object):
         raise TypeError("'{0}' may not be instantiated".format(cls.__name__))
 
     @classmethod
+    def contains(cls, item):
+        return item in cls.names()
+
+    @classmethod
+    def names(cls):
+        return cls._constants.keys()
+
+    @classmethod
+    def internames(cls):
+        return six.iterkeys(cls._constants)
+
+    @classmethod
+    def constants(cls):
+        return cls._constants.values()
+
+    @classmethod
     def iterconstants(cls):
         """
         Get generator for iterating all constants in container.
@@ -132,8 +148,6 @@ class ConstantsContainer(object):
         :returns: a generator for iterating container's constants. Constants
                   will appear in the order they were defined.
         :rtype: :class:`generator`
-
-        :raises AttributeError: if :attr:`constant_class` was not specified
 
         **Example**::
 
@@ -149,7 +163,15 @@ class ConstantsContainer(object):
         return six.itervalues(cls._constants)
 
     @classmethod
-    def find_by_name(cls, name):
+    def items(cls):
+        return cls._constants.items()
+
+    @classmethod
+    def iteritems(cls):
+        return six.iteritems(cls._constants)
+
+    @classmethod
+    def get_by_name(cls, name):
         """
         Try to get constant by it's name.
 
@@ -160,7 +182,6 @@ class ConstantsContainer(object):
 
         :raises KeyError: if constant name ``name`` is not present in
                           container
-        :raises AttributeError: if :attr:`constant_class` was not specified
 
         **Example**::
 
@@ -170,7 +191,7 @@ class ConstantsContainer(object):
             ...     foo = Constant()
             ...     bar = Constant()
             ...
-            >>> FOO.find_by_name('foo')
+            >>> FOO.get_by_name('foo')
             <constant 'FOO.foo'>
         """
         try:
