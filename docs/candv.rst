@@ -1,16 +1,6 @@
 candv package
 =============
 
-Subpackages
------------
-
-.. toctree::
-
-    candv.tests
-
-Submodules
-----------
-
 candv.base module
 -----------------
 
