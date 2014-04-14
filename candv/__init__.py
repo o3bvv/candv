@@ -119,3 +119,12 @@ class Values(_BaseContainer):
     def itervalues(cls):
         for constant in cls.iterconstants():
             yield constant.value
+
+
+class Choices(_BaseContainer):
+
+    constant_class = VerboseConstant
+
+    @classmethod
+    def choices(cls):
+        return tuple((name, x.verbose_name) for name, x in cls.items())
