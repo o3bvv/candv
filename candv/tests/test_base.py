@@ -30,9 +30,9 @@ class ConstantsContainerTestCase(unittest.TestCase):
 
     def test_iternames(self):
         FOO = self._get_foo_class()
-        self.assertEquals(list(FOO.internames()), ['CONSTANT2',
-                                                   'CONSTANT3',
-                                                   'CONSTANT1'])
+        self.assertEquals(list(FOO.iternames()), ['CONSTANT2',
+                                                  'CONSTANT3',
+                                                  'CONSTANT1'])
 
     def test_constants(self):
         FOO = self._get_foo_class()
