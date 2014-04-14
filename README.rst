@@ -3,8 +3,8 @@ candv: Constants & Values
 
 |Build Status| |Coverage Status| |PyPi package| |Downloads|
 
-This is a Python library for creating non-standard constants. Inspired by
-`Constants from Twisted <http://twistedmatrix.com/documents/current/core/howto/constants.html>`_
+This is a little Python library which provides an easy way for creating complex
+constants.. Inspired by `Constants from Twisted <http://twistedmatrix.com/documents/current/core/howto/constants.html>`_
 and `Django form fields <https://docs.djangoproject.com/en/1.6/ref/forms/fields/>`_.
 
 Please, `read the docs <http://candv.readthedocs.org/en/latest/>`_ for more

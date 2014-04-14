@@ -6,19 +6,33 @@
 Welcome to candv's documentation!
 =================================
 
-Contents:
+**candv** stands for `Constants & Values`. It is a little Python library which
+provides an easy way for creating complex constants.
+
+Contents
+========
+
+.. toctree::
+   :maxdepth: 2
+   :numbered:
+
+   intro
+   install
+   usage
+   customization
+
+Modules
+=======
 
 .. toctree::
    :maxdepth: 2
 
-Modules:
+   modules
 
-.. toctree::
-   :maxdepth: 2
+Project's repository
+====================
 
-   modules.rst
-
-Project's repository:
+Feel free to explore, fork or contribute:
 
     https://github.com/oblalex/candv
 
