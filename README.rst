@@ -17,6 +17,6 @@ Please, `read the docs`_ for more information.
 .. |Downloads| image:: https://pypip.in/d/candv/badge.png
    :target: https://crate.io/packages/candv/
 
-..  _Constants from Twisted: <http://twistedmatrix.com/documents/current/core/howto/constants.html>`
-.. _Django form fields: <https://docs.djangoproject.com/en/1.6/ref/forms/fields/>
-.. _read the docs: <http://candv.readthedocs.org/en/latest/>
+.. _Constants from Twisted: http://twistedmatrix.com/documents/current/core/howto/constants.html
+.. _Django form fields: https://docs.djangoproject.com/en/1.6/ref/forms/fields/
+.. _read the docs: http://candv.readthedocs.org/en/latest/
