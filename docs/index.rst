@@ -29,6 +29,10 @@ Changelog
 
 *You can click a version name to see a diff with the previous one.*
 
+* `1.1.1`_ (Jun 21, 2014)
+
+  * switch license from ``GPLv2`` to ``LGPLv3``.
+
 * `1.1.0`_ (Jun 21, 2014)
 
    * remove ``Choices`` container, move it to `django-candv-choices`_ library;
@@ -55,5 +59,6 @@ Indices and tables
 
 .. _django-candv-choices: https://github.com/oblalex/django-candv-choices
 
+.. _1.1.1: https://github.com/oblalex/candv/compare/v1.1.0...v1.1.1
 .. _1.1.0: https://github.com/oblalex/candv/compare/v1.0.0...v1.1.0
 .. _1.0.0: https://github.com/oblalex/candv/releases/tag/v1.0.0
