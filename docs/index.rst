@@ -55,5 +55,5 @@ Indices and tables
 
 .. _django-candv-choices: https://github.com/oblalex/django-candv-choices
 
-.. _1.1.0: https://github.com/oblalex/candv/compare/1.0.0...1.1.0
+.. _1.1.0: https://github.com/oblalex/candv/compare/v1.0.0...v1.1.0
 .. _1.0.0: https://github.com/oblalex/candv/releases/tag/v1.0.0
