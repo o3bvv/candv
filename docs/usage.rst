@@ -8,11 +8,11 @@ called ``containers``.
 
 Every constant has its own name which is equal to the name of container's
 attribure they are assigned to. Every container is a singleton, i.e. you just
-nedd to define container's class and use it. You are not permitted to create
+need to define container's class and use it. You are not permitted to create
 instances of containers. This is unnecessary. Containers have class methods
 for accessing constants in different ways.
 
-Constants remember ther order they were defined inside container.
+Constants remember the order they were defined inside container.
 
 Constants may have custom attributes and methods. Containers may have custom
 class methods. See :doc:`customization docs<customization>`.
@@ -23,7 +23,7 @@ different constant hierarchies (see :ref:`hierarchies`).
 Simple constants
 ^^^^^^^^^^^^^^^^
 
-Simple constants are really simple. They look like enumerations::
+Simple constants are really simple. They look like `enumerations in Python 3.4 <https://docs.python.org/3/library/enum.html>`_::
 
     >>> from candv import SimpleConstant, Constants
     >>> class STATUS(Constants):
@@ -164,7 +164,7 @@ How often do you do things like below?
 This is usually done to add verbose names to constants which you can use
 somewhere, e.g in HTML template:
 
-.. code-block:: html
+.. code-block:: jinja
 
     <select>
     {% for code, name in TYPES %}
@@ -193,7 +193,7 @@ constants::
 
 Now you can rewrite your code:
 
-.. code-block:: html
+.. code-block:: jinja
 
     <select>
     {% for constant in TYPES.constants() %}
@@ -218,30 +218,13 @@ Same thing with values, just use ``VerboseValueConstant``::
 
 Our sample HTML block will look almost the same, except ``value`` attribute:
 
-.. code-block:: html
+.. code-block:: jinja
 
     <select>
     {% for constant in TYPES.constants() %}
         <option value='{{ constant.value }}' title='{{ constant.help_text }}'>{{ constant.verbose_name }}</option>
     {% endfor %}
     </select>
-
-Choices
-^^^^^^^
-
-If you are familiar with Django's `field choices <https://docs.djangoproject.com/en/1.6/ref/models/fields/#choices>`_
-then you may find :class:`~candv.Choices` container helpful::
-
-    >>> class TYPES(Choices):
-    ...     FOO = VerboseConstant('Foooo')
-    ...     BAR = VerboseConstant('Barrr')
-    ...
-
-It accepts instances of ``VerboseConstant`` class or its subclasses and can
-build tuple of tuples with names and verbose names of constants::
-
-    >>> TYPES.choices()
-    (('FOO', 'Foooo'), ('BAR', 'Barrr'))
 
 .. _hierarchies:
 

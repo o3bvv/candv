@@ -5,7 +5,7 @@ python:
     - "3.3"
 install:
     - pip install -e . --use-mirrors
-    - pip install coverage coveralls --use-mirrors
+    - pip install nose coverage coveralls --use-mirrors
 script:
     - coverage run `which nosetests` --nocapture
     - coverage report -m

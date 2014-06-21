@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from candv import (Constants, SimpleConstant, VerboseConstant, Values,
-    ValueConstant, VerboseValueConstant, Choices, )
+from candv import (
+    Constants, SimpleConstant, VerboseConstant, Values, ValueConstant,
+    VerboseValueConstant,
+)
 
 
 class VerboseConstantTestCase(unittest.TestCase):
@@ -177,19 +179,3 @@ class GrouppingTestCase(unittest.TestCase):
             )
 
         self.assertEquals(FOO.B.value, 10)
-
-
-class ChoicesTestCase(unittest.TestCase):
-
-    def test_choices(self):
-
-        class FOO(Choices):
-            ONE = VerboseConstant("first")
-            FOUR = VerboseConstant("fourth")
-            THREE = VerboseConstant("third")
-
-        self.assertEquals(FOO.choices(), (
-            ('ONE', "first"),
-            ('FOUR', "fourth"),
-            ('THREE', "third"),
-        ))

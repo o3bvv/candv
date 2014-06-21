@@ -32,7 +32,7 @@ Providing groups support
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 Well, everything looks fine. But what about creating a group from our new
-constants? First, let's create some::
+constants? First, let's create some constant::
 
     >>> class FOO(Constants):
     ...     BAR = Opcode(300).to_group(Constants,
@@ -78,7 +78,7 @@ new attribute ``compose`` which is a reference to ``compose`` method of our
 .. note::
 
     Be careful with attaching methods of existing objects to another objects.
-    Maybe it will be better for you to use some lambda or define somemethod
+    Maybe it will be better for you to use some lambda or define some method
     within ``merge_into_group``.
 
 Adding verbosity
@@ -96,8 +96,10 @@ If you need to add verbosity to your constants, just use
     ...         self.arg2 = arg2
     ...
 
-Here note, that during call of ``__init__`` method of the super class, you
-pass ``verbose_name`` and ``help_text`` as keyword arguments.
+.. note::
+
+    Here note, that during call of ``__init__`` method of the super class, you
+    need to pass ``verbose_name`` and ``help_text`` as keyword arguments.
 
 Custom containers
 ^^^^^^^^^^^^^^^^^
@@ -114,7 +116,7 @@ from :class:`~candv.Constants` or :class:`~candv.Values`::
 
 Here ``constant_class`` attribute defines top-level class of constants.
 Instances whose class is more general than ``constant_class`` will be invisible
-to container (see :attr:`candv.base.ConstantsContainer.constant_class`). Our
+to container (see :attr:`~candv.base.ConstantsContainer.constant_class`). Our
 new method ``compose_all`` just joins compositions of all its opcodes.
 
 Now it's time to use new container::
@@ -130,7 +132,7 @@ Now it's time to use new container::
     ...         return constant, chunks
 
 Here we add new method ``decompose`` which takes a string and decomposes it
-into tuple of opcode constant and it's arguments. Let's test our conainer::
+into tuple of opcode constant and its arguments. Let's test our conainer::
 
     >>> BAR.compose_all(1, 9, 30)
     '1/1/9/30!2/1/9/30'

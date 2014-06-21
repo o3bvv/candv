@@ -1,8 +1,3 @@
-.. candv documentation master file, created by
-   sphinx-quickstart on Sat Apr 12 11:46:59 2014.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Welcome to candv's documentation!
 =================================
 
@@ -20,6 +15,28 @@ Contents
    install
    usage
    customization
+   misc
+
+Sources
+=======
+
+Feel free to explore, fork or contribute:
+
+    https://github.com/oblalex/candv
+
+Changelog
+=========
+
+*You can click a version name to see a diff with the previous one.*
+
+* `1.1.0`_ (Jun 21, 2014)
+
+   * remove ``Choices`` container, move it to `django-candv-choices`_ library;
+   * update docs and fix typos;
+   * strip utils from requirements.
+
+* `1.0.0`_ (Apr 15, 2014)
+   Initial version.
 
 Modules
 =======
@@ -29,13 +46,6 @@ Modules
 
    modules
 
-Project's repository
-====================
-
-Feel free to explore, fork or contribute:
-
-    https://github.com/oblalex/candv
-
 Indices and tables
 ==================
 
@@ -43,3 +53,7 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
+.. _django-candv-choices: https://github.com/oblalex/django-candv-choices
+
+.. _1.1.0: https://github.com/oblalex/candv/compare/1.0.0...1.1.0
+.. _1.0.0: https://github.com/oblalex/candv/releases/tag/v1.0.0

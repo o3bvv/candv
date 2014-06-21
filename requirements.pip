@@ -5,8 +5,3 @@
 #     pip install -r requirements.pip
 
 six==1.6.1
-
-# Utils:
-
-nose==1.3.0
-Sphinx==1.2.1

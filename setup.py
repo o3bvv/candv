@@ -2,8 +2,10 @@ from setuptools import setup, find_packages
 
 setup(
     name='candv',
-    version='1.0.0',
-    description='Constants and Values: a library for creating non-standard constants',
+    version='1.1.0',
+    description="Constants and Values: create grouped non-standard named "
+                "constants, add values, verbose names, help hexts or anything "
+                "you like to them",
     license='GPLv2',
     url='https://github.com/oblalex/candv',
     author='Alexander Oblovatniy',

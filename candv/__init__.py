@@ -2,8 +2,9 @@
 """
 This module provides ready-to-use classes for constructing custom constants.
 """
-from candv.base import (Constant as SimpleConstant,
-    ConstantsContainer as _BaseContainer)
+from candv.base import (
+    Constant as SimpleConstant, ConstantsContainer as _BaseContainer,
+)
 
 
 class VerboseMixin(object):
@@ -186,38 +187,3 @@ class Values(_BaseContainer):
         """
         for constant in cls.iterconstants():
             yield constant.value
-
-
-class Choices(_BaseContainer):
-    """
-    Container of instances of :class:`VerboseConstant` and it's subclasses.
-
-    Provides support for building `Django-compatible <https://docs.djangoproject.com/en/1.6/ref/models/fields/#choices>`_
-    choices.
-    """
-    #: Set :class:`VerboseConstant` as top-level class for this container.
-    #: See :attr:`~candv.base.ConstantsContainer.constant_class`.
-    constant_class = VerboseConstant
-
-    @classmethod
-    def choices(cls):
-        """
-        Get a tuple of tuples representing constant's name and its verbose name.
-
-        :returns: a tuple of constant's names and their verbose names in order
-                  they were defined.
-
-        **Example**::
-
-            >>> from candv import Choices, VerboseConstant
-            >>> class FOO(Choices):
-            ...     ONE = VerboseConstant("first", help_text="first choice")
-            ...     FOUR = VerboseConstant("fourth")
-            ...     THREE = VerboseConstant("third")
-            ...
-            >>> FOO.choices()
-            (('ONE', 'first'), ('FOUR', 'fourth'), ('THREE', 'third'))
-            >>> FOO.get_by_name('ONE').help_text
-            'first choice'
-        """
-        return tuple((name, x.verbose_name) for name, x in cls.items())
