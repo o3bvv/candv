@@ -31,7 +31,7 @@ Changelog
 
 * `1.1.1`_ (Jun 21, 2014)
 
-  * switch license from ``GPLv2`` to ``LGPLv3``.
+   * switch license from ``GPLv2`` to ``LGPLv3``.
 
 * `1.1.0`_ (Jun 21, 2014)
 
