@@ -249,12 +249,16 @@ class ConstantsContainer(object):
         """
         return list(cls.iterconstants())
 
+    values = constants
+
     @classmethod
     def iterconstants(cls):
         """
         Same as :meth:`constants` but returns an interator.
         """
         return six.itervalues(cls._constants)
+
+    itervalues = iterconstants
 
     @classmethod
     def items(cls):
