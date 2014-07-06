@@ -56,6 +56,13 @@ List all constants in the container::
     >>> STATUS.constants()
     [<constant 'STATUS.SUCCESS'>, <constant 'STATUS.FAILURE'>]
 
+.. note::
+
+    Since 1.1.2 you can list constants and get the same result by calling
+    :meth:`~candv.base.ConstantsContainer.values` and
+    :meth:`~candv.base.ConstantsContainer.itervalues` also. Take into account,
+    those methods are overridden in :class:`~candv.Values` (see section below).
+
 Check whether the container has constant with a given name::
 
     >>> STATUS.contains('SUCCESS')
@@ -126,6 +133,14 @@ List all values inside the container::
 
     >>> TEAMS.values()
     [0, 1, 2]
+
+.. note::
+
+    Since 1.1.2 methods :meth:`~candv.Values.values` and
+    :meth:`~candv.Values.itervalues` from :class:`~candv.Values` override
+    methods :meth:`~candv.base.ConstantsContainer.values` and
+    :meth:`~candv.base.ConstantsContainer.itervalues` from
+    :class:`~candv.base.ConstantsContainer` accordingly.
 
 If you have different constants with equal values, it's OK anyway::
 

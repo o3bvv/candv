@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='candv',
-    version='1.1.1',
+    version='1.1.2',
     description="Constants and Values: create grouped non-standard named "
                 "constants, add values, verbose names, help hexts or anything "
                 "you like to them",

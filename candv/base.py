@@ -249,12 +249,28 @@ class ConstantsContainer(object):
         """
         return list(cls.iterconstants())
 
+    #: *New since 1.1.2.*
+    #:
+    #: Alias for :meth:`constants`.
+    #: Added for consistency with dictionaries. Use :class:`~candv.Values` and
+    #: :meth:`~candv.Values.values` if you need to have constants with real
+    #: values.
+    values = constants
+
     @classmethod
     def iterconstants(cls):
         """
         Same as :meth:`constants` but returns an interator.
         """
         return six.itervalues(cls._constants)
+
+    #: *New since 1.1.2.*
+    #:
+    #: Alias for :meth:`iterconstants`.
+    #: Added for consistency with dictionaries. Use :class:`~candv.Values` and
+    #: :meth:`~candv.Values.itervalues` if you need to have constants with real
+    #: values.
+    itervalues = iterconstants
 
     @classmethod
     def items(cls):

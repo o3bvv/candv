@@ -177,6 +177,10 @@ class Values(_BaseContainer):
             ...
             >>> FOO.values()
             [2, 1, 'some string']
+
+        .. note::
+
+            Overrides :meth:`~candv.base.ConstantsContainer.values` since 1.1.2.
         """
         return [x.value for x in cls.iterconstants()]
 
@@ -184,6 +188,11 @@ class Values(_BaseContainer):
     def itervalues(cls):
         """
         Same as :meth:`values` but returns an interator.
+
+        .. note::
+
+            Overrides :meth:`~candv.base.ConstantsContainer.itervalues` since
+            1.1.2.
         """
         for constant in cls.iterconstants():
             yield constant.value
