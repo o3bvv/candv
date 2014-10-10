@@ -108,13 +108,13 @@ class ConstantTestCase(unittest.TestCase):
     def test_container(self):
 
         constant = Constant()
-        self.assertIsNone(constant._container)
+        self.assertIsNone(constant.container)
 
         class FOO(ConstantsContainer):
             constant_class = Constant
             CONSTANT = Constant()
 
-        self.assertEquals(FOO.CONSTANT._container, FOO)
+        self.assertEquals(FOO.CONSTANT.container, FOO)
 
     def test_name(self):
 

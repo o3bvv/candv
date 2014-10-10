@@ -2,7 +2,7 @@
 """
 This module provides ready-to-use classes for constructing custom constants.
 """
-from candv.base import (
+from .base import (
     Constant as SimpleConstant, ConstantsContainer as _BaseContainer,
 )
 
@@ -180,7 +180,8 @@ class Values(_BaseContainer):
 
         .. note::
 
-            Overrides :meth:`~candv.base.ConstantsContainer.values` since 1.1.2.
+            Overrides :meth:`~candv.base.ConstantsContainer.values` since
+            1.1.2.
         """
         return [x.value for x in cls.iterconstants()]
 

@@ -20,8 +20,10 @@ class _LazyConstantsGroup(object):
     def __init__(self, constant, group_class, **group_members):
         for name, obj in group_members.items():
             if not isinstance(obj, (Constant, _LazyConstantsGroup)):
-                raise TypeError("{0} cannot be a member of a constants group"
-                                .format(obj.__class__))
+                raise TypeError(
+                    "{0} cannot be a member of a constants group"
+                    .format(obj.__class__)
+                )
         self.constant = constant
         self.group_class = group_class
         self.group_members = group_members
@@ -34,7 +36,7 @@ class _LazyConstantsGroup(object):
         group_repr = _constant_repr(cls_name)
 
         group_members.update({
-            '__new__': object.__new__, # Remove singleton protection
+            '__new__': object.__new__,  # Remove singleton protection
             '__repr__': lambda self: group_repr,
             '__name__': name,
             'name': name,
@@ -59,8 +61,8 @@ class Constant(object):
 
     def __init__(self):
         self.name = None
+        self.container = None
         self._repr = ''
-        self._container = None
 
         # Increase the creation counter, and save our local copy.
         self._creation_counter = Constant._creation_counter
@@ -71,8 +73,8 @@ class Constant(object):
         Called automatically by container after container's class construction.
         """
         self.name = name
+        self.container = container
         self._repr = _constant_repr("{0}.{1}".format(container.__name__, name))
-        self._container = container
 
     def to_group(self, group_class, **group_members):
         """
@@ -138,25 +140,28 @@ class _ConstantsContainerMeta(type):
             return cls
         elif not issubclass(constant_class, Constant):
             raise TypeError(
-                "Constant class {0} must be derived from {1}".format(
-                 constant_class.__name__, Constant.__name__))
+                "Constant class {0} must be derived from {1}"
+                .format(constant_class.__name__, Constant.__name__)
+            )
 
         constants = []
-        for name, obj in list(six.iteritems(attributes)):
-            if isinstance(obj, _LazyConstantsGroup):
-                new_obj = obj._evaluate(cls, name)
-                del obj.constant
+        for name, constant in list(six.iteritems(attributes)):
+            if isinstance(constant, _LazyConstantsGroup):
+                new_obj = constant._evaluate(cls, name)
+                del constant.constant
                 setattr(cls, name, new_obj)
                 constants.append((name, new_obj))
-            elif isinstance(obj, constant_class):
-                if obj._container is not None:
+            elif isinstance(constant, constant_class):
+                if constant.container is not None:
                     raise ValueError(
-                        "Cannot use {0} as the value of an attribute {1} on {2}"
-                        .format(obj, name, cls.__name__))
-                obj._post_init(cls, name)
-                constants.append((name, obj))
+                        "Cannot use '{0}' as the value of an attribute '{1}' "
+                        "on '{2}'"
+                        .format(constant, name, cls.__name__)
+                    )
+                constant._post_init(cls, name)
+                constants.append((name, constant))
 
-        constants.sort(key=lambda name_obj: name_obj[1]._creation_counter)
+        constants.sort(key=lambda x: x[1]._creation_counter)
         cls._constants = OrderedDict(constants)
         return cls
 
@@ -277,8 +282,8 @@ class ConstantsContainer(object):
         """
         Get list of constants with their names.
 
-        :returns: list of constants with their names in order they were defined.
-                  Each element in list is a :class:`tuple` in format
+        :returns: list of constants with their names in order they were
+                  defined. Each element in list is a :class:`tuple` in format
                   ``(name, constant)``.
         :rtype: :class:`list`
 
@@ -328,5 +333,7 @@ class ConstantsContainer(object):
         try:
             return cls._constants[name]
         except KeyError:
-            raise KeyError("Constant with name '{0}' is not present in '{1}'"
-                           .format(name, cls.__name__))
+            raise KeyError(
+                "Constant with name '{0}' is not present in '{1}'"
+                .format(name, cls.__name__)
+            )
