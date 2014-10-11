@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from candv.base import Constant, ConstantsContainer
+from candv.base import Constant, ConstantsContainer, with_constant_class
 
 
 class ConstantsContainerTestCase(unittest.TestCase):
@@ -171,6 +171,22 @@ class ConstantsContainerTestCase(unittest.TestCase):
             "\"BAR\" for \"<constants container 'B'>\", because "
             "\"<constant 'A.BAR'>\" already belongs to "
             "\"<constants container 'A'>\"."
+        )
+
+    def test_constant_class_mixin(self):
+
+        class SomeConstant(Constant):
+            pass
+
+        class FOO(with_constant_class(SomeConstant), ConstantsContainer):
+            A = SomeConstant()
+            B = SomeConstant()
+            C = Constant()
+
+        self.assertEqual(FOO.constant_class, SomeConstant)
+        self.assertEqual(
+            FOO.constants(),
+            [FOO.A, FOO.B, ]
         )
 
 

@@ -380,3 +380,27 @@ class ConstantsContainer(object):
             "not designed for that."
             .format(cls)
         )
+
+
+def with_constant_class(the_class):
+    """
+    A decorator which allows to set constant class for constants container
+    outside container itself. This may help to create more readable container
+    definition, e.g.:
+
+        >>> from candv import Constants, SimpleConstant, with_constant_class
+        >>>
+        >>> class SomeConstant(SimpleConstant):
+        ...     pass
+        ...
+        >>> class FOO(with_constant_class(SomeConstant), Constants):
+        ...     A = SomeConstant()
+        ...     B = SomeConstant()
+        ...
+        >>> FOO.constant_class
+        <class '__main__.SomeConstant'>
+    """
+    class ConstantContainerMixin(object):
+        constant_class = the_class
+
+    return ConstantContainerMixin

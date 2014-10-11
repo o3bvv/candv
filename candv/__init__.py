@@ -2,7 +2,10 @@
 """
 This module provides ready-to-use classes for constructing custom constants.
 """
-from .base import Constant as SimpleConstant, ConstantsContainer as Constants
+from .base import (
+    Constant as SimpleConstant, ConstantsContainer as Constants,
+    with_constant_class,
+)
 
 
 class VerboseMixin(object):
@@ -98,14 +101,11 @@ class VerboseValueConstant(VerboseMixin, ValueConstant):
                                                    help_text=help_text)
 
 
-class Values(Constants):
+class Values(with_constant_class(ValueConstant), Constants):
     """
     Constants container which supports getting and filtering constants by their
     values, listing values of all constants in container.
     """
-    #: Set :class:`ValueConstant` as top-level class for this container.
-    #: See :attr:`~candv.base.ConstantsContainer.constant_class`.
-    constant_class = ValueConstant
 
     @classmethod
     def get_by_value(cls, value):

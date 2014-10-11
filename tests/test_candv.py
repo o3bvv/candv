@@ -76,6 +76,19 @@ class ConstantsTestCase(unittest.TestCase):
             ['two', 'one', 'four', 'three', ]
         )
 
+    def test_mixed_constant_classes_less_generic(self):
+
+        class FOO(Values):
+            two = VerboseConstant("2", "just two")
+            one = SimpleConstant()
+            four = ValueConstant(4)
+            three = VerboseValueConstant(3, "three", "just three")
+
+        self.assertEquals(
+            [x.name for x in FOO.iterconstants()],
+            ['four', 'three', ]
+        )
+
 
 class ValuesTestCase(unittest.TestCase):
 
