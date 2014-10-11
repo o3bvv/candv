@@ -15,7 +15,7 @@ class ConstantsContainerTestCase(unittest.TestCase):
             cm.exception.args[0],
             "\"<constants container 'ConstantsContainer'>\" cannot be "
             "instantiated, because constant containers are not designed for "
-            "this."
+            "that."
         )
 
     def _get_container(self):
