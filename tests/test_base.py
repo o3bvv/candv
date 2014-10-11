@@ -12,7 +12,7 @@ class ConstantsContainerTestCase(unittest.TestCase):
             ConstantsContainer()
 
         self.assertEqual(
-            cm.exception.message,
+            cm.exception.args[0],
             "\"<constants container 'ConstantsContainer'>\" cannot be "
             "instantiated, because constant containers are not designed for "
             "this."
@@ -105,7 +105,7 @@ class ConstantsContainerTestCase(unittest.TestCase):
         with self.assertRaises(KeyError) as cm:
             FOO.get_by_name('CONSTANT_X')
         self.assertEqual(
-            cm.exception.message,
+            cm.exception.args[0],
             "Constant \"CONSTANT_X\" is not present in "
             "\"<constants container 'FOO'>\""
         )
@@ -118,7 +118,7 @@ class ConstantsContainerTestCase(unittest.TestCase):
                 constant_class = int
 
         self.assertEqual(
-            cm.exception.message,
+            cm.exception.args[0],
             "\"<type 'int'>\" which is used as \"constant_class\" for "
             "\"<constants container 'FOO'>\" must be derived from "
             "\"<class 'candv.base.Constant'>\"."
@@ -137,7 +137,7 @@ class ConstantsContainerTestCase(unittest.TestCase):
                 BAR = A.BAR
 
         self.assertEqual(
-            cm.exception.message,
+            cm.exception.args[0],
             "Cannot use \"<constant 'A.BAR'>\" as value for the attribute "
             "\"BAR\" for \"<constants container 'B'>\", because "
             "\"<constant 'A.BAR'>\" already belongs to "
@@ -262,7 +262,7 @@ class GrouppingTestCase(unittest.TestCase):
                     C=1)
 
         self.assertEqual(
-            cm.exception.message,
+            cm.exception.args[0],
             "\"1\" cannot be a member of a group. Only instances of "
             "\"<class 'candv.base.Constant'>\" or other groups can be."
         )

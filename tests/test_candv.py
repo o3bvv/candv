@@ -91,8 +91,9 @@ class ValuesTestCase(unittest.TestCase):
 
         with self.assertRaises(ValueError) as cm:
             FOO.get_by_value(3)
+
         self.assertEqual(
-            cm.exception.message,
+            cm.exception.args[0],
             "Constant with value \"3\" is not present in "
             "\"<constants container 'FOO'>\""
         )
