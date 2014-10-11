@@ -30,7 +30,7 @@ class Constant(object):
         self._creation_counter = Constant._creation_counter
         Constant._creation_counter += 1
 
-    def _post_init(self, container, name):
+    def _post_init(self, name, container=None):
         """
         Called automatically by container after container's class construction.
         """
@@ -82,7 +82,8 @@ class Constant(object):
 
     @property
     def full_name(self):
-        return "{0}.{1}".format(self.container.full_name, self.name)
+        prefix = self.container.full_name if self.container else "__UNBOUND__"
+        return "{0}.{1}".format(prefix, self.name)
 
     def __repr__(self):
         """
@@ -166,8 +167,10 @@ class _ConstantsContainerMeta(type):
                         'to "{3}".'
                         .format(the_object, name, cls, the_object.container)
                     )
-                the_object._post_init(cls, name)
+                the_object._post_init(name, cls)
                 constants.append((name, the_object))
+            elif isinstance(the_object, Constant):
+                the_object._post_init(name)
         constants.sort(key=lambda x: x[1]._creation_counter)
         cls._constants = OrderedDict(constants)
 

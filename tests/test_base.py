@@ -173,7 +173,7 @@ class ConstantsContainerTestCase(unittest.TestCase):
             "\"<constants container 'A'>\"."
         )
 
-    def test_constant_class_mixin(self):
+    def test_constant_class_mixin_factory(self):
 
         class SomeConstant(Constant):
             pass

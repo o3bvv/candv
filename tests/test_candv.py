@@ -89,6 +89,21 @@ class ConstantsTestCase(unittest.TestCase):
             ['four', 'three', ]
         )
 
+    def test_unbound_constant(self):
+
+        class FOO(Values):
+            one = SimpleConstant()
+            two = ValueConstant(2)
+
+        self.assertEquals(
+            [x.name for x in FOO.iterconstants()],
+            ['two', ]
+        )
+
+        self.assertEqual(FOO.one.name, 'one')
+        self.assertEqual(FOO.one.full_name, '__UNBOUND__.one')
+        self.assertEqual(repr(FOO.one), "<constant '__UNBOUND__.one'>")
+
 
 class ValuesTestCase(unittest.TestCase):
 
