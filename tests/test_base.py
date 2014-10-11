@@ -119,9 +119,9 @@ class ConstantsContainerTestCase(unittest.TestCase):
 
         self.assertEqual(
             cm.exception.args[0],
-            "\"<type 'int'>\" which is used as \"constant_class\" for "
+            "\"{0}\" which is used as \"constant_class\" for "
             "\"<constants container 'FOO'>\" must be derived from "
-            "\"<class 'candv.base.Constant'>\"."
+            "\"<class 'candv.base.Constant'>\".".format(repr(int))
         )
 
     def test_reuse_of_constant(self):
