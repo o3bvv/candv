@@ -1,3 +1,5 @@
+.. _dive-in:
+
 Dive in
 =======
 

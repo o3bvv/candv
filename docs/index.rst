@@ -26,7 +26,7 @@ Changelog
 
 *You can click a version name to see a diff with the previous one.*
 
-* `1.2.0`_ (Oct 10, 2014)
+* `1.2.0`_ (Oct 11, 2014)
 
    #. Core classes were significantly refactored.
    #. ``constant_class`` uses :class:`~candv.base.Constant` as default value
@@ -58,6 +58,8 @@ Changelog
       really need it, it will not break now.
    #. Exception messages are more informative now.
    #. Tests were moved out the package.
+   #. :ref:`Introductory documentation <dive-in>` was improved (I believe
+      somebody can understand it now).
 
 * `1.1.2`_ (Jul 6, 2014)
 
