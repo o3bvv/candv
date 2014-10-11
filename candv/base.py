@@ -11,43 +11,6 @@ import six
 from collections import OrderedDict
 
 
-def _constant_repr(full_name):
-    return "<constant '{0}'>".format(full_name)
-
-
-class _LazyConstantsGroup(object):
-
-    def __init__(self, constant, group_class, **group_members):
-        for name, obj in group_members.items():
-            if not isinstance(obj, (Constant, _LazyConstantsGroup)):
-                raise TypeError(
-                    "{0} cannot be a member of a constants group"
-                    .format(obj.__class__)
-                )
-        self.constant = constant
-        self.group_class = group_class
-        self.group_members = group_members
-
-    def _evaluate(self, parent, name):
-        group_class, self.group_class = self.group_class, None
-        group_members, self.group_members = self.group_members, None
-
-        cls_name = "{0}.{1}".format(parent.__name__, name)
-        group_repr = _constant_repr(cls_name)
-
-        group_members.update({
-            '__new__': object.__new__,  # Remove singleton protection
-            '__repr__': lambda self: group_repr,
-            '__name__': name,
-            'name': name,
-        })
-
-        cls = type(cls_name, (group_class, ), group_members)
-        group = cls()
-        self.constant.merge_into_group(group)
-        return group
-
-
 class Constant(object):
     """
     Base class for all constants. Can be merged into a container instance.
@@ -62,7 +25,6 @@ class Constant(object):
     def __init__(self):
         self.name = None
         self.container = None
-        self._repr = ''
 
         # Increase the creation counter, and save our local copy.
         self._creation_counter = Constant._creation_counter
@@ -74,7 +36,6 @@ class Constant(object):
         """
         self.name = name
         self.container = container
-        self._repr = _constant_repr("{0}.{1}".format(container.__name__, name))
 
     def to_group(self, group_class, **group_members):
         """
@@ -94,7 +55,8 @@ class Constant(object):
 
             class FOO(Constants):
                 A = SimpleConstant()
-                B = SimpleConstant().to_group(Constants,
+                B = SimpleConstant().to_group(
+                    group_class=Constants,
                     B2=SimpleConstant(),
                     B0=SimpleConstant(),
                     B1=SimpleConstant(),
@@ -118,12 +80,80 @@ class Constant(object):
         """
         group._creation_counter = self._creation_counter
 
+    @property
+    def full_name(self):
+        return "{0}.{1}".format(self.container.full_name, self.name)
+
     def __repr__(self):
         """
         Return text identifying both which constant this is and which
         collection it belongs to.
         """
-        return self._repr
+        return "<constant '{0}'>".format(self.full_name)
+
+
+def _evaluate_constants(obj, attributes):
+    constants = []
+    for name, the_object in six.iteritems(attributes):
+        if isinstance(the_object, _LazyConstantsGroup):
+            group = the_object._evaluate(obj, name)
+            setattr(obj, name, group)
+            constants.append((name, group))
+        elif isinstance(the_object, obj.constant_class):
+            if the_object.container is not None:
+                raise ValueError(
+                    'Cannot use "{0}" as value for the attribute '
+                    '"{1}" for "{2}", because "{0}" already belongs '
+                    'to "{3}".'
+                    .format(the_object, name, obj, the_object.container)
+                )
+            the_object._post_init(obj, name)
+            constants.append((name, the_object))
+
+    constants.sort(key=lambda x: x[1]._creation_counter)
+    obj._constants.update(OrderedDict(constants))
+
+
+class _LazyConstantsGroup(object):
+
+    def __init__(self, constant, group_class, **group_members):
+        for name, obj in group_members.items():
+            if not isinstance(obj, (Constant, _LazyConstantsGroup)):
+                raise TypeError(
+                    "\"{0}\" cannot be a member of a group. Only instances of "
+                    "\"{1}\" or other groups can be."
+                    .format(obj, Constant)
+                )
+        self.constant = constant
+        self.group_class = group_class
+        self.group_members = group_members
+
+    def _evaluate(self, parent, name):
+        full_name = "{0}.{1}".format(parent.full_name, name)
+        __repr__ = lambda x: "<constants group '{0}'>".format(full_name)
+        attributes = {
+            '__name__': name,
+            '__new__': object.__new__,  # Remove singleton protection
+            '__repr__': classmethod(__repr__),
+            'name': name,
+            'container': parent,
+            'full_name': full_name,
+            '_constants_eveluation': False,
+        }
+        attributes.update(self.group_members)
+
+        cls = type(full_name, (self.group_class, ), attributes)
+
+        group = cls()
+        _evaluate_constants(group, self.group_members)
+
+        self.constant.merge_into_group(group)
+
+        del self.constant
+        del self.group_class
+        del self.group_members
+
+        return group
 
 
 class _ConstantsContainerMeta(type):
@@ -131,39 +161,37 @@ class _ConstantsContainerMeta(type):
     Metaclass for creating constants container classes.
     """
     def __new__(self, class_name, bases, attributes):
-        cls = super(_ConstantsContainerMeta, self).__new__(
-            self, class_name, bases, attributes)
+        constants_eveluation = attributes.pop('_constants_eveluation', True)
+
+        cls = (
+            super(_ConstantsContainerMeta, self)
+            .__new__(self, class_name, bases, attributes)
+        )
+        # Create '_constants' as class attribute, so we can use class methods
+        # in future
+        cls._constants = OrderedDict()
 
         constant_class = getattr(cls, 'constant_class', None)
-
-        if constant_class is None:
-            return cls
-        elif not issubclass(constant_class, Constant):
+        if not issubclass(constant_class, Constant):
             raise TypeError(
-                "Constant class {0} must be derived from {1}"
-                .format(constant_class.__name__, Constant.__name__)
+                "\"{0}\" which is used as \"constant_class\" for \"{1}\" must "
+                "be derived from \"{2}\"."
+                .format(constant_class, cls, Constant)
             )
-
-        constants = []
-        for name, constant in list(six.iteritems(attributes)):
-            if isinstance(constant, _LazyConstantsGroup):
-                new_obj = constant._evaluate(cls, name)
-                del constant.constant
-                setattr(cls, name, new_obj)
-                constants.append((name, new_obj))
-            elif isinstance(constant, constant_class):
-                if constant.container is not None:
-                    raise ValueError(
-                        "Cannot use '{0}' as the value of an attribute '{1}' "
-                        "on '{2}'"
-                        .format(constant, name, cls.__name__)
-                    )
-                constant._post_init(cls, name)
-                constants.append((name, constant))
-
-        constants.sort(key=lambda x: x[1]._creation_counter)
-        cls._constants = OrderedDict(constants)
+        # We may skip evaluation to manually specify a container object for
+        # constants
+        if constants_eveluation:
+            _evaluate_constants(cls, attributes)
         return cls
+
+    @property
+    def name(self):
+        return self.__name__
+
+    full_name = name
+
+    def __repr__(self):
+        return "<constants container '{0}'>".format(self.name)
 
 
 @six.add_metaclass(_ConstantsContainerMeta)
@@ -183,7 +211,7 @@ class ConstantsContainer(object):
     """
 
     #: Defines a top-level class of constants which can be stored by container
-    constant_class = None
+    constant_class = Constant
 
     def __new__(cls):
         """
@@ -192,7 +220,11 @@ class ConstantsContainer(object):
 
         The class object itself is used directly.
         """
-        raise TypeError("'{0}' may not be instantiated".format(cls.__name__))
+        raise TypeError(
+            "\"{0}\" cannot be instantiated, because constant containers are "
+            "not designed for this."
+            .format(cls)
+        )
 
     @classmethod
     def contains(cls, name):
@@ -334,6 +366,6 @@ class ConstantsContainer(object):
             return cls._constants[name]
         except KeyError:
             raise KeyError(
-                "Constant with name '{0}' is not present in '{1}'"
-                .format(name, cls.__name__)
+                "Constant \"{0}\" is not present in \"{1}\""
+                .format(name, cls)
             )

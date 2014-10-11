@@ -2,9 +2,7 @@
 """
 This module provides ready-to-use classes for constructing custom constants.
 """
-from .base import (
-    Constant as SimpleConstant, ConstantsContainer as _BaseContainer,
-)
+from .base import Constant as SimpleConstant, ConstantsContainer as Constants
 
 
 class VerboseMixin(object):
@@ -60,28 +58,6 @@ class VerboseConstant(VerboseMixin, SimpleConstant):
                                               help_text=help_text)
 
 
-class Constants(_BaseContainer):
-    """
-    Simple container for any :class:`~candv.base.Constant` or it's subclass.
-    This container can be used as enumeration.
-
-    **Example**::
-
-        >>> from candv import Constants, SimpleConstant
-        >>> class USER_ROLES(Constants):
-        ...     ADMIN = SimpleConstant()
-        ...     ANONYMOUS = SimpleConstant()
-        ...
-        >>> USER_ROLES.ADMIN
-        <constant 'USER_ROLES.ADMIN'>
-        >>> USER_ROLES.get_by_name('ANONYMOUS')
-        <constant 'USER_ROLES.ANONYMOUS'>
-    """
-    #: Set :class:`~candv.base.Constant` as top-level class for this container.
-    #: See :attr:`~candv.base.ConstantsContainer.constant_class`.
-    constant_class = SimpleConstant
-
-
 class ValueConstant(SimpleConstant):
     """
     Extended version of :class:`SimpleConstant` which provides support for
@@ -122,7 +98,7 @@ class VerboseValueConstant(VerboseMixin, ValueConstant):
                                                    help_text=help_text)
 
 
-class Values(_BaseContainer):
+class Values(Constants):
     """
     Constants container which supports getting and filtering constants by their
     values, listing values of all constants in container.
@@ -143,8 +119,10 @@ class Values(_BaseContainer):
         for constant in cls.iterconstants():
             if constant.value == value:
                 return constant
-        raise ValueError("Value '{0}' is not present in '{1}'".format(
-                         value, cls.__name__))
+        raise ValueError(
+            "Constant with value \"{0}\" is not present in \"{1}\""
+            .format(value, cls)
+        )
 
     @classmethod
     def filter_by_value(cls, value):
