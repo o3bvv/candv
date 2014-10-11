@@ -87,7 +87,7 @@ class ValuesTestCase(unittest.TestCase):
             ONE_DUB = ValueConstant(1)
 
         self.assertEquals(FOO.get_by_value(1), FOO.ONE)
-        self.assertEquals(FOO.get_by_value(2), FOO.get_by_name('TWO'))
+        self.assertEquals(FOO.get_by_value(2), FOO.get('TWO'))
 
         with self.assertRaises(ValueError) as cm:
             FOO.get_by_value(3)

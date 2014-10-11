@@ -92,28 +92,6 @@ class Constant(object):
         return "<constant '{0}'>".format(self.full_name)
 
 
-def _evaluate_constants(obj, attributes):
-    constants = []
-    for name, the_object in six.iteritems(attributes):
-        if isinstance(the_object, _LazyConstantsGroup):
-            group = the_object._evaluate(obj, name)
-            setattr(obj, name, group)
-            constants.append((name, group))
-        elif isinstance(the_object, obj.constant_class):
-            if the_object.container is not None:
-                raise ValueError(
-                    'Cannot use "{0}" as value for the attribute '
-                    '"{1}" for "{2}", because "{0}" already belongs '
-                    'to "{3}".'
-                    .format(the_object, name, obj, the_object.container)
-                )
-            the_object._post_init(obj, name)
-            constants.append((name, the_object))
-
-    constants.sort(key=lambda x: x[1]._creation_counter)
-    obj._constants.update(OrderedDict(constants))
-
-
 class _LazyConstantsGroup(object):
 
     def __init__(self, constant, group_class, **group_members):
@@ -130,23 +108,13 @@ class _LazyConstantsGroup(object):
 
     def _evaluate(self, parent, name):
         full_name = "{0}.{1}".format(parent.full_name, name)
-        __repr__ = lambda x: "<constants group '{0}'>".format(full_name)
-        attributes = {
-            '__name__': name,
-            '__new__': object.__new__,  # Remove singleton protection
-            '__repr__': classmethod(__repr__),
+        self.group_members.update({
             'name': name,
-            'container': parent,
             'full_name': full_name,
-            '_constants_eveluation': False,
-        }
-        attributes.update(self.group_members)
-
-        cls = type(full_name, (self.group_class, ), attributes)
-
-        group = cls()
-        _evaluate_constants(group, self.group_members)
-
+            'container': parent,
+            '__repr': "<constants group '{0}'>".format(full_name),
+        })
+        group = type(full_name, (self.group_class, ), self.group_members)
         self.constant.merge_into_group(group)
 
         del self.constant
@@ -161,15 +129,20 @@ class _ConstantsContainerMeta(type):
     Metaclass for creating constants container classes.
     """
     def __new__(self, class_name, bases, attributes):
-        constants_eveluation = attributes.pop('_constants_eveluation', True)
+        if not 'name' in attributes:
+            attributes['name'] = class_name
+        if not 'full_name' in attributes:
+            attributes['full_name'] = class_name
 
+        __repr = attributes.pop(
+            '__repr',
+            "<constants container '{0}'>".format(attributes['name'])
+        )
         cls = (
             super(_ConstantsContainerMeta, self)
             .__new__(self, class_name, bases, attributes)
         )
-        # Create '_constants' as class attribute, so we can use class methods
-        # in future
-        cls._constants = OrderedDict()
+        cls.__repr = __repr
 
         constant_class = getattr(cls, 'constant_class', None)
         if not issubclass(constant_class, Constant):
@@ -178,20 +151,202 @@ class _ConstantsContainerMeta(type):
                 "be derived from \"{2}\"."
                 .format(constant_class, cls, Constant)
             )
-        # We may skip evaluation to manually specify a container object for
-        # constants
-        if constants_eveluation:
-            _evaluate_constants(cls, attributes)
+
+        constants = []
+        for name, the_object in six.iteritems(attributes):
+            if isinstance(the_object, _LazyConstantsGroup):
+                group = the_object._evaluate(cls, name)
+                setattr(cls, name, group)
+                constants.append((name, group))
+            elif isinstance(the_object, cls.constant_class):
+                if the_object.container is not None:
+                    raise ValueError(
+                        'Cannot use "{0}" as value for the attribute '
+                        '"{1}" for "{2}", because "{0}" already belongs '
+                        'to "{3}".'
+                        .format(the_object, name, cls, the_object.container)
+                    )
+                the_object._post_init(cls, name)
+                constants.append((name, the_object))
+        constants.sort(key=lambda x: x[1]._creation_counter)
+        cls._constants = OrderedDict(constants)
+
         return cls
 
-    @property
-    def name(self):
-        return self.__name__
-
-    full_name = name
-
     def __repr__(self):
-        return "<constants container '{0}'>".format(self.name)
+        return self.__repr
+
+    def __getitem__(self, name):
+        """
+        Try to get constant by it's name.
+
+        :param str name: name of constant to search for
+
+        :returns: a constant
+        :rtype: an instance of :class:`Constant` or it's subclass
+
+        :raises KeyError: if constant name ``name`` is not present in
+                          container
+
+        **Example**::
+
+            >>> from candv import Constants, SimpleConstant
+            >>> class FOO(Constants):
+            ...     foo = SimpleConstant()
+            ...     bar = SimpleConstant()
+            ...
+            >>> FOO['foo']
+            <constant 'FOO.foo'>
+        """
+        try:
+            return self._constants[name]
+        except KeyError:
+            raise KeyError(
+                "Constant \"{0}\" is not present in \"{1}\""
+                .format(name, self)
+            )
+
+    def __contains__(self, name):
+        return name in self._constants
+
+    def __len__(self):
+        return len(self._constants)
+
+    def __iter__(self):
+        return self.iternames()
+
+    def get(self, name, default=None):
+        """
+        Try to get constant by it's name or fallback to default.
+
+        :param str name: name of constant to search for
+        :param default: an object returned by default if constant with a given
+                        name is not present in the container
+
+        :returns: a constant or a default value
+        :rtype: an instance of :class:`Constant` or it's subclass, or `default`
+                value
+
+        **Example**::
+
+            >>> from candv import Constants, SimpleConstant
+            >>> class FOO(Constants):
+            ...     foo = SimpleConstant()
+            ...     bar = SimpleConstant()
+            ...
+            >>> FOO.get('foo')
+            <constant 'FOO.foo'>
+            >>> FOO.get('xxx')
+            >>>
+            >>> FOO.get('xxx', default=123)
+            123
+        """
+        return self[name] if name in self else default
+
+    def has_name(self, name):
+        """
+        Check if container has a constant with a given name.
+
+        :param str name: a constant's name to check
+
+        :returns: ``True`` if given name belongs to container,
+                  ``False`` otherwise
+        :rtype: :class:`bool`
+        """
+        return name in self
+
+    def names(self):
+        """
+        List all names of constants within container.
+
+        :returns: a list of constant names in order constants were defined
+        :rtype: :class:`list` of strings
+
+        **Example**::
+
+            >>> from candv import Constants, SimpleConstant
+            >>> class FOO(Constants):
+            ...     foo = SimpleConstant()
+            ...     bar = SimpleConstant()
+            ...
+            >>> FOO.names()
+            ['foo', 'bar']
+        """
+        return list(self.iternames())
+
+    def iternames(self):
+        """
+        Same as :meth:`names` but returns an interator.
+        """
+        return six.iterkeys(self._constants)
+
+    def constants(self):
+        """
+        List all constants in container.
+
+        :returns: list of constants in order they were defined
+        :rtype: :class:`list`
+
+        **Example**::
+
+            >>> from candv import Constants, SimpleConstant
+            >>> class FOO(Constants):
+            ...     foo = SimpleConstant()
+            ...     bar = SimpleConstant()
+            ...
+            >>> [x.name for x in FOO.constants()]
+            ['foo', 'bar']
+        """
+        return list(self.iterconstants())
+
+    def iterconstants(self):
+        """
+        Same as :meth:`constants` but returns an interator.
+        """
+        return six.itervalues(self._constants)
+
+    def items(self):
+        """
+        Get list of constants with their names.
+
+        :returns: list of constants with their names in order they were
+                  defined. Each element in list is a :class:`tuple` in format
+                  ``(name, constant)``.
+        :rtype: :class:`list`
+
+        **Example**::
+
+            >>> from candv import Constants, SimpleConstant
+            >>> class FOO(Constants):
+            ...     foo = SimpleConstant()
+            ...     bar = SimpleConstant()
+            ...
+            >>> FOO.items()
+            [('foo', <constant 'FOO.foo'>), ('bar', <constant 'FOO.bar'>)]
+        """
+        return list(self.iteritems())
+
+    def iteritems(self):
+        """
+        Same as :meth:`items` but returns an interator.
+        """
+        return six.iteritems(self._constants)
+
+    #: *New since 1.1.2.*
+    #:
+    #: Alias for :meth:`constants`.
+    #: Added for consistency with dictionaries. Use :class:`~candv.Values` and
+    #: :meth:`~candv.Values.values` if you need to have constants with real
+    #: values.
+    values = constants
+
+    #: *New since 1.1.2.*
+    #:
+    #: Alias for :meth:`iterconstants`.
+    #: Added for consistency with dictionaries. Use :class:`~candv.Values` and
+    #: :meth:`~candv.Values.itervalues` if you need to have constants with real
+    #: values.
+    itervalues = iterconstants
 
 
 @six.add_metaclass(_ConstantsContainerMeta)
@@ -222,150 +377,6 @@ class ConstantsContainer(object):
         """
         raise TypeError(
             "\"{0}\" cannot be instantiated, because constant containers are "
-            "not designed for this."
+            "not designed for that."
             .format(cls)
         )
-
-    @classmethod
-    def contains(cls, name):
-        """
-        Check if container has a constant with a given name.
-
-        :param str name: a constant's name to check
-
-        :returns: ``True`` if given name belongs to container,
-                  ``False`` otherwise
-        :rtype: :class:`bool`
-        """
-        return name in cls.names()
-
-    @classmethod
-    def names(cls):
-        """
-        List all names of constants within container.
-
-        :returns: a list of constant names in order constants were defined
-        :rtype: :class:`list` of strings
-
-        **Example**::
-
-            >>> from candv import Constants, SimpleConstant
-            >>> class FOO(Constants):
-            ...     foo = SimpleConstant()
-            ...     bar = SimpleConstant()
-            ...
-            >>> FOO.names()
-            ['foo', 'bar']
-        """
-        return list(cls.iternames())
-
-    @classmethod
-    def iternames(cls):
-        """
-        Same as :meth:`names` but returns an interator.
-        """
-        return six.iterkeys(cls._constants)
-
-    @classmethod
-    def constants(cls):
-        """
-        List all constants in container.
-
-        :returns: list of constants in order they were defined
-        :rtype: :class:`list`
-
-        **Example**::
-
-            >>> from candv import Constants, SimpleConstant
-            >>> class FOO(Constants):
-            ...     foo = SimpleConstant()
-            ...     bar = SimpleConstant()
-            ...
-            >>> [x.name for x in FOO.constants()]
-            ['foo', 'bar']
-        """
-        return list(cls.iterconstants())
-
-    #: *New since 1.1.2.*
-    #:
-    #: Alias for :meth:`constants`.
-    #: Added for consistency with dictionaries. Use :class:`~candv.Values` and
-    #: :meth:`~candv.Values.values` if you need to have constants with real
-    #: values.
-    values = constants
-
-    @classmethod
-    def iterconstants(cls):
-        """
-        Same as :meth:`constants` but returns an interator.
-        """
-        return six.itervalues(cls._constants)
-
-    #: *New since 1.1.2.*
-    #:
-    #: Alias for :meth:`iterconstants`.
-    #: Added for consistency with dictionaries. Use :class:`~candv.Values` and
-    #: :meth:`~candv.Values.itervalues` if you need to have constants with real
-    #: values.
-    itervalues = iterconstants
-
-    @classmethod
-    def items(cls):
-        """
-        Get list of constants with their names.
-
-        :returns: list of constants with their names in order they were
-                  defined. Each element in list is a :class:`tuple` in format
-                  ``(name, constant)``.
-        :rtype: :class:`list`
-
-        **Example**::
-
-            >>> from candv import Constants, SimpleConstant
-            >>> class FOO(Constants):
-            ...     foo = SimpleConstant()
-            ...     bar = SimpleConstant()
-            ...
-            >>> FOO.items()
-            [('foo', <constant 'FOO.foo'>), ('bar', <constant 'FOO.bar'>)]
-        """
-        return list(cls.iteritems())
-
-    @classmethod
-    def iteritems(cls):
-        """
-        Same as :meth:`items` but returns an interator.
-        """
-        return six.iteritems(cls._constants)
-
-    @classmethod
-    def get_by_name(cls, name):
-        """
-        Try to get constant by it's name.
-
-        :param str name: name of constant to search for
-
-        :returns: a constant
-        :rtype: a class specified by :attr:`constant_class` which is
-                :class:`Constant` or it's subclass
-
-        :raises KeyError: if constant name ``name`` is not present in
-                          container
-
-        **Example**::
-
-            >>> from candv import Constants, SimpleConstant
-            >>> class FOO(Constants):
-            ...     foo = SimpleConstant()
-            ...     bar = SimpleConstant()
-            ...
-            >>> FOO.get_by_name('foo')
-            <constant 'FOO.foo'>
-        """
-        try:
-            return cls._constants[name]
-        except KeyError:
-            raise KeyError(
-                "Constant \"{0}\" is not present in \"{1}\""
-                .format(name, cls)
-            )

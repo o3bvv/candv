@@ -27,15 +27,15 @@ class ConstantsContainerTestCase(unittest.TestCase):
 
         return FOO
 
-    def test_group_name(self):
+    def test_name(self):
         FOO = self._get_container()
         self.assertEquals(FOO.name, 'FOO')
 
-    def test_group_full_name(self):
+    def test_full_name(self):
         FOO = self._get_container()
         self.assertEquals(FOO.full_name, 'FOO')
 
-    def test_group_repr(self):
+    def test_repr(self):
         FOO = self._get_container()
         self.assertEquals(repr(FOO), "<constants container 'FOO'>")
 
@@ -51,6 +51,20 @@ class ConstantsContainerTestCase(unittest.TestCase):
         self.assertEquals(
             list(FOO.iternames()),
             ['CONSTANT2', 'CONSTANT3', 'CONSTANT1', ]
+        )
+
+    def test_values(self):
+        FOO = self._get_container()
+        self.assertEquals(
+            FOO.values(),
+            [FOO.CONSTANT2, FOO.CONSTANT3, FOO.CONSTANT1, ]
+        )
+
+    def test_itervalues(self):
+        FOO = self._get_container()
+        self.assertEquals(
+            list(FOO.itervalues()),
+            [FOO.CONSTANT2, FOO.CONSTANT3, FOO.CONSTANT1, ]
         )
 
     def test_constants(self):
@@ -89,26 +103,41 @@ class ConstantsContainerTestCase(unittest.TestCase):
             ]
         )
 
+    def test_iter(self):
+        FOO = self._get_container()
+        for x, y in zip(FOO, FOO.iternames()):
+            self.assertEqual(x, y)
+
+    def test_len(self):
+        FOO = self._get_container()
+        self.assertEqual(len(FOO), 3)
+
     def test_contains(self):
         FOO = self._get_container()
-        self.assertTrue(FOO.contains('CONSTANT2'))
-        self.assertFalse(FOO.contains('CONSTANT_X'))
+        self.assertTrue('CONSTANT2' in FOO)
+        self.assertFalse('CONSTANT_X' in FOO)
 
-    def test_get_by_name(self):
+    def test_has_name(self):
         FOO = self._get_container()
+        self.assertTrue(FOO.has_name('CONSTANT2'))
+        self.assertFalse(FOO.has_name('CONSTANT_X'))
 
-        self.assertEquals(
-            FOO.get_by_name('CONSTANT2'),
-            FOO.CONSTANT2
-        )
+    def test_get_item(self):
+        FOO = self._get_container()
+        self.assertEquals(FOO['CONSTANT2'], FOO.CONSTANT2)
 
         with self.assertRaises(KeyError) as cm:
-            FOO.get_by_name('CONSTANT_X')
+            FOO['CONSTANT_X']
         self.assertEqual(
             cm.exception.args[0],
             "Constant \"CONSTANT_X\" is not present in "
             "\"<constants container 'FOO'>\""
         )
+
+    def test_get(self):
+        FOO = self._get_container()
+        self.assertEquals(FOO.get('CONSTANT2'), FOO.CONSTANT2)
+        self.assertEquals(FOO.get('CONSTANT_X'), None)
 
     def test_invalid_constant_class(self):
 
@@ -197,20 +226,6 @@ class GrouppingTestCase(unittest.TestCase):
 
         return FOO
 
-    def test_container_names(self):
-        FOO = self._get_group()
-        self.assertEquals(
-            FOO.names(),
-            ['A', 'B', ]
-        )
-
-    def test_get_by_name_from_container(self):
-        FOO = self._get_group()
-        self.assertEquals(
-            FOO.get_by_name('B'),
-            FOO.B
-        )
-
     def test_group_name(self):
         FOO = self._get_group()
         self.assertEquals(FOO.B.name, 'B')
@@ -221,10 +236,107 @@ class GrouppingTestCase(unittest.TestCase):
 
     def test_group_repr(self):
         FOO = self._get_group()
+        self.assertEquals(repr(FOO.B), "<constants group 'FOO.B'>")
+
+    def test_group_names(self):
+        FOO = self._get_group()
         self.assertEquals(
-            repr(FOO.B),
-            "<constants group 'FOO.B'>"
+            FOO.B.names(),
+            ['B2', 'B0', 'B1', ]
         )
+
+    def test_group_iternames(self):
+        FOO = self._get_group()
+        self.assertEquals(
+            list(FOO.B.iternames()),
+            ['B2', 'B0', 'B1', ]
+        )
+
+    def test_group_values(self):
+        FOO = self._get_group()
+        self.assertEquals(
+            FOO.B.values(),
+            [FOO.B.B2, FOO.B.B0, FOO.B.B1, ]
+        )
+
+    def test_group_itervalues(self):
+        FOO = self._get_group()
+        self.assertEquals(
+            list(FOO.B.itervalues()),
+            [FOO.B.B2, FOO.B.B0, FOO.B.B1, ]
+        )
+
+    def test_group_constants(self):
+        FOO = self._get_group()
+        self.assertEquals(
+            FOO.B.constants(),
+            [FOO.B.B2, FOO.B.B0, FOO.B.B1, ]
+        )
+
+    def test_group_iterconstants(self):
+        FOO = self._get_group()
+        self.assertEquals(
+            list(FOO.B.iterconstants()),
+            [FOO.B.B2, FOO.B.B0, FOO.B.B1, ]
+        )
+
+    def test_group_items(self):
+        FOO = self._get_group()
+        self.assertEquals(
+            FOO.B.items(),
+            [
+                ('B2', FOO.B.B2),
+                ('B0', FOO.B.B0),
+                ('B1', FOO.B.B1),
+            ]
+        )
+
+    def test_group_iteritems(self):
+        FOO = self._get_group()
+        self.assertEquals(
+            list(FOO.B.iteritems()),
+            [
+                ('B2', FOO.B.B2),
+                ('B0', FOO.B.B0),
+                ('B1', FOO.B.B1),
+            ]
+        )
+
+    def test_group_iter(self):
+        FOO = self._get_group()
+        for x, y in zip(FOO.B, FOO.B.iternames()):
+            self.assertEqual(x, y)
+
+    def test_group_len(self):
+        FOO = self._get_group()
+        self.assertEqual(len(FOO.B), 3)
+
+    def test_group_contains(self):
+        FOO = self._get_group()
+        self.assertTrue('B2' in FOO.B)
+        self.assertFalse('B_X' in FOO.B)
+
+    def test_group_has_name(self):
+        FOO = self._get_group()
+        self.assertTrue(FOO.B.has_name('B2'))
+        self.assertFalse(FOO.B.has_name('B_X'))
+
+    def test_group_get_item(self):
+        FOO = self._get_group()
+        self.assertEquals(FOO.B['B2'], FOO.B.B2)
+
+        with self.assertRaises(KeyError) as cm:
+            FOO.B['B_X']
+        self.assertEqual(
+            cm.exception.args[0],
+            "Constant \"B_X\" is not present in "
+            "\"<constants group 'FOO.B'>\""
+        )
+
+    def test_group_get(self):
+        FOO = self._get_group()
+        self.assertEquals(FOO.B.get('B2'), FOO.B.B2)
+        self.assertEquals(FOO.B.get('B_X'), None)
 
     def test_group_container(self):
         FOO = self._get_group()
@@ -234,19 +346,16 @@ class GrouppingTestCase(unittest.TestCase):
         FOO = self._get_group()
         self.assertEquals(FOO.B.B2.container, FOO.B)
 
-    def test_group_names(self):
+    def test_container_names(self):
         FOO = self._get_group()
         self.assertEquals(
-            FOO.B.names(),
-            ['B2', 'B0', 'B1', ]
+            FOO.names(),
+            ['A', 'B', ]
         )
 
-    def test_get_by_name_from_group(self):
+    def test_get_from_container(self):
         FOO = self._get_group()
-        self.assertEquals(
-            FOO.B.get_by_name('B0'),
-            FOO.B.B0
-        )
+        self.assertEquals(FOO['B'], FOO.B)
 
     def test_group_member_full_name(self):
         FOO = self._get_group()
