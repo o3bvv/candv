@@ -387,7 +387,7 @@ class ConstantsContainer(object):
 
 def with_constant_class(the_class):
     """
-    A decorator which allows to set constant class for constants container
+    A mixin factory which allows to set constant class for constants container
     outside container itself. This may help to create more readable container
     definition, e.g.:
 

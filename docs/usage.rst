@@ -20,8 +20,10 @@ class methods. See :doc:`customization docs<customization>`.
 Constants may be converted into groups of constants providing ability to create
 different constant hierarchies (see :ref:`hierarchies`).
 
+.. _usage_simple_constants:
+
 Simple constants
-^^^^^^^^^^^^^^^^
+----------------
 
 Simple constants are really simple. They look like `enumerations in Python 3.4 <https://docs.python.org/3/library/enum.html>`_::
 
@@ -81,8 +83,10 @@ Get constant by name or get a :class:`KeyError`::
         .format(name, cls.__name__))
     KeyError: "Constant with name 'XXX' is not present in 'STATUS'"
 
+.. _usage_valued_constants:
+
 Constants with values
-^^^^^^^^^^^^^^^^^^^^^
+---------------------
 
 Constants with values behave like simple constants, except they can have any
 object attached to them as a value. It's something like an ordered dictionary::
@@ -164,8 +168,10 @@ If you need to get all constants with same value, use
     >>> FOO.filter_by_value('one')
     [<constant 'FOO.ATTR1'>, <constant 'FOO.ATTR1_DUB'>]
 
+.. _usage_verbose_constants:
+
 Verbose constants
-^^^^^^^^^^^^^^^^^
+-----------------
 
 How often do you do things like below?
 
@@ -244,7 +250,7 @@ Our sample HTML block will look almost the same, except ``value`` attribute:
 .. _hierarchies:
 
 Hierarchies
-^^^^^^^^^^^
+-----------
 
 **candv** library supports direct attaching of a group of constants to another
 constant to create hierarchies. A group can be created from any constant and

@@ -1,11 +1,14 @@
+.. _customization:
+
 Customization
 =============
 
 If all you've seen before is not enough for you, then you can create your own
 constants and containers for them. Let's see some examples.
 
+
 Custom constants
-^^^^^^^^^^^^^^^^
+----------------
 
 Imagine you need to create some constant class. For example, you need to define
 some operation codes and have ability to create come commands with arguments::
@@ -28,8 +31,9 @@ So, just a class with a method. Nothing special. You can use it right now::
     >>> OPERATIONS.REQ.compose(1, 9, 3, 2, 0)
     '100/1/9/3/2/0'
 
+
 Providing groups support
-^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------
 
 Well, everything looks fine. But what about creating a group from our new
 constants? First, let's create some constant::
@@ -82,7 +86,7 @@ new attribute ``compose`` which is a reference to ``compose`` method of our
     within ``merge_into_group``.
 
 Adding verbosity
-^^^^^^^^^^^^^^^^
+----------------
 
 If you need to add verbosity to your constants, just use
 :class:`~candv.VerboseMixin` mixin as the first base of your own class::
@@ -101,8 +105,10 @@ If you need to add verbosity to your constants, just use
     Here note, that during call of ``__init__`` method of the super class, you
     need to pass ``verbose_name`` and ``help_text`` as keyword arguments.
 
+.. _custom_containers:
+
 Custom containers
-^^^^^^^^^^^^^^^^^
+-----------------
 
 To define own container, just derive new class from existing containers, e.g.
 from :class:`~candv.Constants` or :class:`~candv.Values`::

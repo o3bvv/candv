@@ -11,7 +11,7 @@ REQUIREMENTS = [i.strip() for i in open('requirements.txt').readlines()]
 
 setup(
     name='candv',
-    version='1.1.2',
+    version='1.2.0',
     description="Constants and Values: create grouped non-standard named "
                 "constants, add values, verbose names, help texts or anything "
                 "you like to them",
