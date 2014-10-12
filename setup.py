@@ -4,10 +4,13 @@ import os
 from setuptools import setup, find_packages
 
 
-here = os.path.abspath(os.path.dirname(__file__))
+__here__ = os.path.abspath(os.path.dirname(__file__))
 
-README = open(os.path.join(here, 'README.rst')).read()
-REQUIREMENTS = [i.strip() for i in open('requirements.txt').readlines()]
+README = open(os.path.join(__here__, 'README.rst')).read()
+REQUIREMENTS = [
+    i.strip() for i in
+    open(os.path.join(__here__, 'requirements.txt')).readlines()
+]
 
 setup(
     name='candv',
