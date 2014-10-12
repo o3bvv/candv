@@ -15,10 +15,10 @@ for accessing constants in different ways.
 Constants remember the order they were defined inside container.
 
 Constants may have custom attributes and methods. Containers may have custom
-class methods. See :doc:`customization docs<customization>`.
+class methods. :doc:`See customization docs<customization>`.
 
 Constants may be converted into groups of constants providing ability to create
-different constant hierarchies (see :ref:`hierarchies`).
+different constant hierarchies (:ref:`see Hierarchies <hierarchies>`).
 
 .. _usage_simple_constants:
 
@@ -33,30 +33,50 @@ Simple constants are really simple. They look like `enumerations in Python 3.4 <
     ...     FAILURE = SimpleConstant()
     ...
 
-And they can be used just like enumerations. Here ``STATUS`` is a subclass of
-:class:`candv.Constants`. The latter can contain any instances of
-:class:`~candv.base.Constant` class or its subclasses. ``SimpleConstant`` is
-just an alias to :class:`candv.base.Constant`.
+And they can be used just like enumerations.
 
-Access some constant::
+Here ``STATUS`` is a subclass of :class:`candv.Constants`. The latter can
+contain any instances of :class:`candv.SimpleConstant` class or its subclasses.
 
-    >>> STATUS.SUCCESS
-    <constant 'STATUS.SUCCESS'>
+.. note::
 
-Access its name::
+    ``candv.SimpleConstant`` and ``candv.Constants`` are aliases for
+    :class:`candv.base.Constant` and :class:`candv.base.ConstantsContainer`
+    respectively.
 
-    >>> STATUS.SUCCESS.name
-    'SUCCESS'
+``STATUS`` is a container::
 
-List names of all constants in the container::
+    >>> STATUS
+    <constants container 'STATUS'>
 
+All containers have the following attributes::
+
+    >>> STATUS.name
+    'STATUS'
+    >>> STATUS.full_name
+    'STATUS'
+
+They have an API which is similar to the API of Python's :class:`dict` (in the
+mater of accessing its members):
+
+::
+
+    >>> len(STATUS)
+    2
+    >>> 'SUCCESS' in STATUS
+    True
+    >>> STATUS.has_name('PENDING')
+    False
     >>> STATUS.names()
     ['SUCCESS', 'FAILURE']
-
-List all constants in the container::
-
     >>> STATUS.constants()
     [<constant 'STATUS.SUCCESS'>, <constant 'STATUS.FAILURE'>]
+    >>> STATUS.items()
+    [('SUCCESS', <constant 'STATUS.SUCCESS'>), ('FAILURE', <constant 'STATUS.FAILURE'>)]
+    >>> STATUS['FAILURE']
+    <constant 'STATUS.FAILURE'>
+    >>> STATUS.get('XXX', 999)
+    999
 
 .. note::
 
@@ -65,23 +85,19 @@ List all constants in the container::
     :meth:`~candv.base.ConstantsContainer.itervalues` also. Take into account,
     those methods are overridden in :class:`~candv.Values` (see section below).
 
-Check whether the container has constant with a given name::
+Also, you can access constants directly::
 
-    >>> STATUS.contains('SUCCESS')
-    True
-    >>> STATUS.contains('XXX')
-    False
+    >>> STATUS.SUCCESS
+    <constant 'STATUS.SUCCESS'>
 
-Get constant by name or get a :class:`KeyError`::
+And access its attributes::
 
-    >>> STATUS.get_by_name('FAILURE')
-    <constant 'STATUS.FAILURE'>
-    >>> STATUS.get_by_name('XXX')
-    Traceback (most recent call last):
-      File "<input>", line 1, in <module>
-      File "candv/base.py", line 316, in get_by_name
-        .format(name, cls.__name__))
-    KeyError: "Constant with name 'XXX' is not present in 'STATUS'"
+    >>> STATUS.SUCCESS.name
+    'SUCCESS'
+    >>> STATUS.SUCCESS.full_name
+    'STATUS.SUCCESS'
+    >>> STATUS.SUCCESS.container
+    <constants container 'STATUS'>
 
 .. _usage_valued_constants:
 
@@ -93,50 +109,44 @@ object attached to them as a value. It's something like an ordered dictionary::
 
     >>> from candv import ValueConstant, Values
     >>> class TEAMS(Values):
-    ...     NONE = ValueConstant(0)
-    ...     RED = ValueConstant(1)
-    ...     BLUE = ValueConstant(2)
+    ...     NONE = ValueConstant('#EEE')
+    ...     RED = ValueConstant('#F00')
+    ...     BLUE = ValueConstant('#00F')
     ...
 
 Here ``TEAMS`` is a subclass of :class:`~candv.Values`, which is a more
 specialized container than :class:`~candv.Constants`. As you may guessed,
 :class:`~candv.ValueConstant` is a more specialized constant class than
-``SimpleConstant`` and its instances have own values. ``Values`` and its
-subclasses treat as constants only instances of ``ValueConstant`` or its
-sublasses::
+``SimpleConstant`` and its instances have own values.
 
-    >>> class INVALID(Values):
-    ...     FOO = SimpleConstant()
-    ...     BAR = SimpleConstant()
-    ...
+.. note::
 
-Here ``INVALID`` contains 2 instances of ``SimpleConstant``, which is more
-gerenal then ``ValueConstant``. It's not an error, but those 2 constants will
-be invisible for the container::
+    ``Values`` and its subclasses treat as constants only instances of ``ValueConstant`` or its sublasses::
 
-    >>> INVALID.constants()
-    []
+        >>> class UNBOUND_CONSTANTS(Values):
+        ...     FOO = SimpleConstant()
+        ...     BAR = SimpleConstant()
+        ...
 
-Ok, let's get back to our ``TEAMS``. You can access values of constants:
+    Here ``UNBOUND_CONSTANTS`` container contains 2 instances of
+    ``SimpleConstant``, which is more gerenal then ``ValueConstant``. It's not an
+    error, but those 2 constants will be invisible for the container::
 
-    >>> TEAMS.RED.value
-    1
+        >>> UNBOUND_CONSTANTS.constants()
+        []
+        >>> UNBOUND_CONSTANTS.FOO
+        <constant '__UNBOUND__.FOO'>
 
-Get constant by its value or get :class:`ValueError`::
+So, ``TEAMS`` is just another container::
 
-    >>> TEAMS.get_by_value(2)
-    <constant 'TEAMS.BLUE'>
-    >>> TEAMS.get_by_value(-1)
-    Traceback (most recent call last):
-      File "<input>", line 1, in <module>
-      File "candv/__init__.py", line 146, in get_by_value
-        value, cls.__name__))
-    ValueError: Value '-1' is not present in 'TEAMS'
+    >>> TEAMS
+    <constants container 'TEAMS'>
 
-List all values inside the container::
+It has extra methods for working with valued constants. For example, you can
+list all values::
 
     >>> TEAMS.values()
-    [0, 1, 2]
+    ['#EEE', '#F00', '#00F']
 
 .. note::
 
@@ -145,6 +155,12 @@ List all values inside the container::
     methods :meth:`~candv.base.ConstantsContainer.values` and
     :meth:`~candv.base.ConstantsContainer.itervalues` from
     :class:`~candv.base.ConstantsContainer` accordingly.
+
+And you can get a constant by its value::
+
+    >>> TEAMS.get_by_value('#F00')
+    <constant 'TEAMS.RED'>
+
 
 If you have different constants with equal values, it's OK anyway::
 
@@ -168,6 +184,11 @@ If you need to get all constants with same value, use
     >>> FOO.filter_by_value('one')
     [<constant 'FOO.ATTR1'>, <constant 'FOO.ATTR1_DUB'>]
 
+And of course, you can access values of constants:
+
+    >>> TEAMS.RED.value
+    '#F00'
+
 .. _usage_verbose_constants:
 
 Verbose constants
@@ -189,7 +210,7 @@ somewhere, e.g in HTML template:
 
     <select>
     {% for code, name in TYPES %}
-        <option value='{{ code }}'>{{ name }}</option>
+      <option value='{{ code }}'>{{ name }}</option>
     {% endfor %}
     </select>
 
@@ -200,16 +221,16 @@ Well, spare yourself from headache and use verbose constants
 
     >>> from candv import VerboseConstant, Constants
     >>> class TYPES(Constants):
-    ...     foo = VerboseConstant("Some foo constant", "help")
-    ...     bar = VerboseConstant(verbose_name="Some bar constant",
+    ...     FOO = VerboseConstant("Some foo constant", "help")
+    ...     BAR = VerboseConstant(verbose_name="Some bar constant",
     ...                           help_text="some help")
 
-Here you can access ``verbose_name`` and ``help_text`` as attributes of
+Here you can access ``verbose_name`` and ``help_text`` attributes of
 constants::
 
-    >>> TYPES.foo.verbose_name
+    >>> TYPES.FOO.verbose_name
     'Some foo constant'
-    >>> TYPES.foo.help_text
+    >>> TYPES.FOO.help_text
     'help'
 
 Now you can rewrite your code:
@@ -218,7 +239,9 @@ Now you can rewrite your code:
 
     <select>
     {% for constant in TYPES.constants() %}
-        <option value='{{ constant.name }}' title='{{ constant.help_text }}'>{{ constant.verbose_name }}</option>
+      <option value='{{ constant.name }}' title='{{ constant.help_text }}'>
+        {{ constant.verbose_name }}
+      </option>
     {% endfor %}
     </select>
 
@@ -237,13 +260,16 @@ Same thing with values, just use ``VerboseValueConstant``::
     >>> TYPES.FOO.help_text
     'help'
 
-Our sample HTML block will look almost the same, except ``value`` attribute:
+Our sample HTML block will look almost the same and will use ``value``
+attribute:
 
 .. code-block:: jinja
 
     <select>
     {% for constant in TYPES.constants() %}
-        <option value='{{ constant.value }}' title='{{ constant.help_text }}'>{{ constant.verbose_name }}</option>
+      <option value='{{ constant.value }}' title='{{ constant.help_text }}'>
+        {{ constant.verbose_name }}
+      </option>
     {% endfor %}
     </select>
 
@@ -254,8 +280,9 @@ Hierarchies
 
 **candv** library supports direct attaching of a group of constants to another
 constant to create hierarchies. A group can be created from any constant and
-any container can be used to store children. You may already saw this in
-:ref:`introduction <complex-example>`, but let's examine simple example::
+any container can be used to store children. You may already saw this in the
+:ref:`introduction chapter <complex-example>`, but let's examine simple
+example::
 
     >>> from candv import Constants, SimpleConstant
     >>> class TREE(Constants):
@@ -275,7 +302,19 @@ new container and any number of constant instances passed as keywords. You can
 access any group as any usual constant and use it as any usual container at the
 same time::
 
+    >>> TREE.LEFT
+    <constants group 'TREE.LEFT'>
+    >>> TREE.LEFT.name
+    'LEFT'
+    >>> TREE.LEFT.full_name
+    'TREE.LEFT'
+    >>> TREE.LEFT.constant_class
+    <class 'candv.base.Constant'>
+    >>> TREE.LEFT.names()
+    ['LEFT', 'RIGHT']
     >>> TREE.LEFT.LEFT
     <constant 'TREE.LEFT.LEFT'>
-    >>> TREE.RIGHT.names()
-    ['LEFT', 'RIGHT']
+    >>> TREE.LEFT.LEFT.full_name
+    'TREE.LEFT.LEFT'
+    >>> TREE.LEFT.LEFT.container
+    <constants group 'TREE.LEFT'>

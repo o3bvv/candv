@@ -37,7 +37,7 @@ Changelog
       methods which usual containers have.
    #. Constant's ``container`` attribute was made public. Groups of constants
       now have it too (see :ref:`hierarchies`).
-   #. API of containers was made really close to API of Python's ``dict``
+   #. API of containers was made really close to API of Python's :class:`dict`
       (:ref:`see usage <usage_simple_constants>` for more info):
 
       * ``__getitem__``, ``__contains__``, ``__len__`` and ``__iter__`` magic
@@ -58,8 +58,8 @@ Changelog
       really need it, it will not break now.
    #. Exception messages are more informative now.
    #. Tests were moved out the package.
-   #. :ref:`Introductory documentation <dive-in>` was improved (I believe
-      somebody can understand it now).
+   #. :ref:`Introductory documentation <dive-in>` was improved. Other docs were
+      updated too.
 
 * `1.1.2`_ (Jul 6, 2014)
 
@@ -71,9 +71,9 @@ Changelog
 
 * `1.1.0`_ (Jun 21, 2014)
 
-   * remove ``Choices`` container, move it to `django-candv-choices`_ library;
-   * update docs and fix typos;
-   * strip utils from requirements.
+   #. remove ``Choices`` container, move it to `django-candv-choices`_ library;
+   #. update docs and fix typos;
+   #. strip utils from requirements.
 
 * `1.0.0`_ (Apr 15, 2014)
    Initial version.
