@@ -10,7 +10,9 @@ Tests
 See the output of tests execution at `Travis CI`_.
 
 If you need to run tests locally, you need to have `nose`_ installed. Then
-just run::
+just run
+
+::
 
     $ nosetests
 
@@ -26,7 +28,7 @@ run::
 Building docs
 ^^^^^^^^^^^^^
 
-If you need to have a local copy of this docs, you will need to install
+If you need to have a local copy of these docs, you will need to install
 `Sphinx`_ and `make`_. Then::
 
     $ cd docs

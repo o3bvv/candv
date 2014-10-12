@@ -23,23 +23,23 @@ some operation codes and have ability to create come commands with arguments::
 
 So, just a class with a method. Nothing special. You can use it right now::
 
-    >>> from candv import Constants
-    >>> class OPERATIONS(Constants):
+    >>> from candv import Values
+    >>> class OPERATIONS(Values):
     ...     REQ = Opcode(100)
     ...     ACK = Opcode(200)
     ...
-    >>> OPERATIONS.REQ.compose(1, 9, 3, 2, 0)
-    '100/1/9/3/2/0'
+    >>> OPERATIONS.REQ.compose(1, 2, 3, 4, 5)
+    '100/1/2/3/4/5'
 
 
-Providing groups support
+Adding support of groups
 ------------------------
 
 Well, everything looks fine. But what about creating a group from our new
 constants? First, let's create some constant::
 
-    >>> class FOO(Constants):
-    ...     BAR = Opcode(300).to_group(Constants,
+    >>> class FOO(Values):
+    ...     BAR = Opcode(300).to_group(Values,
     ...         BAZ = Opcode(301),
     ...     )
 
@@ -65,8 +65,8 @@ class::
     ...         super(Opcode, self).merge_into_group(group)
     ...         group.compose = self.compose
     ...
-    >>> class FOO(Constants):
-    ...     BAR = Opcode(300).to_group(Constants,
+    >>> class FOO(Values):
+    ...     BAR = Opcode(300).to_group(Values,
     ...         BAZ = Opcode(301),
     ...     )
     ...
@@ -82,8 +82,8 @@ new attribute ``compose`` which is a reference to ``compose`` method of our
 .. note::
 
     Be careful with attaching methods of existing objects to another objects.
-    Maybe it will be better for you to use some lambda or define some method
-    within ``merge_into_group``.
+    Maybe it will be better for you to use some *lambda* or to define some
+    method within ``merge_into_group``.
 
 Adding verbosity
 ----------------
@@ -115,6 +115,7 @@ from :class:`~candv.Constants` or :class:`~candv.Values`::
 
     >>> class FOO(Values):
     ...     constant_class = Opcode
+    ...
     ...     @classmethod
     ...     def compose_all(cls, *args):
     ...         return '!'.join(map(lambda x: x.compose(*args), cls.constants()))
@@ -125,11 +126,27 @@ Instances whose class is more general than ``constant_class`` will be invisible
 to container (see :attr:`~candv.base.ConstantsContainer.constant_class`). Our
 new method ``compose_all`` just joins compositions of all its opcodes.
 
+.. note::
+
+    Since *1.2.0* you can use :meth:`~candv.base.with_constant_class` mixin
+    factory to make definitions of your containers more readable, e.g.::
+
+        >>> from candv import with_constant_class
+        >>> class FOO(with_constant_class(Opcode), Values):
+        ...
+        ...     @classmethod
+        ...     def compose_all(cls, *args):
+        ...         return '!'.join(map(lambda x: x.compose(*args), cls.constants()))
+        ...
+
+    This will produce the same class as above.
+
 Now it's time to use new container::
 
     >>> class BAR(FOO):
     ...     REQ = Opcode(1)
     ...     ACK = Opcode(2)
+    ...
     ...     @classmethod
     ...     def decompose(cls, value):
     ...         chunks = value.split('/')
@@ -140,8 +157,8 @@ Now it's time to use new container::
 Here we add new method ``decompose`` which takes a string and decomposes it
 into tuple of opcode constant and its arguments. Let's test our conainer::
 
-    >>> BAR.compose_all(1, 9, 30)
-    '1/1/9/30!2/1/9/30'
+    >>> BAR.compose_all(500, 600, 700)
+    '1/500/600/700!2/500/600/700'
     >>> BAR.decompose('1/100/200')
     (<constant 'BAR.REQ'>, ['100', '200'])
 
