@@ -50,7 +50,7 @@ class VerboseMixin(object):
 
     def to_primitive(self, context=None):
         """
-        .. versionadded:: 1.2.1
+        .. versionadded:: 1.3.0
         """
         primitive = super(VerboseMixin, self).to_primitive(context)
         to_text = lambda x: six.text_type(x) if x is not None else x
@@ -99,7 +99,7 @@ class ValueConstant(SimpleConstant):
 
     def to_primitive(self, context=None):
         """
-        .. versionadded:: 1.2.1
+        .. versionadded:: 1.3.0
         """
         primitive = super(ValueConstant, self).to_primitive(context)
         value = self.value

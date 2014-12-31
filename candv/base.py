@@ -89,7 +89,7 @@ class Constant(object):
 
     def to_primitive(self, context=None):
         """
-        .. versionadded:: 1.2.1
+        .. versionadded:: 1.3.0
         """
         return {'name': self.name, }
 
@@ -377,7 +377,7 @@ class _ConstantsContainerMeta(type):
 
     def to_primitive(self, context=None):
         """
-        .. versionadded:: 1.2.1
+        .. versionadded:: 1.3.0
         """
         return {
             'name': self.name,

@@ -331,7 +331,7 @@ same time::
 Exporting
 ---------
 
-.. versionadded:: 1.2.1
+.. versionadded:: 1.3.0
 
 You can convert constants and containers into Python primitives for further
 serialization, for example, into JSON.

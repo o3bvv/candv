@@ -26,7 +26,7 @@ Changelog
 
 *You can click a version name to see a diff with the previous one.*
 
-* `1.2.1`_ (Dec 31, 2014)
+* `1.3.0`_ (Dec 31, 2014)
 
    #. Implement ``to_primitive()`` method, which can be used for
       serialization, for example, into JSON (`#1`_).
@@ -136,7 +136,7 @@ Indices and tables
 
 .. _#1: https://github.com/oblalex/candv/issues/1
 
-.. _1.2.1: https://github.com/oblalex/candv/compare/v1.2.0...v1.2.1
+.. _1.3.0: https://github.com/oblalex/candv/compare/v1.2.0...v1.3.0
 .. _1.2.0: https://github.com/oblalex/candv/compare/v1.1.2...v1.2.0
 .. _1.1.2: https://github.com/oblalex/candv/compare/v1.1.1...v1.1.2
 .. _1.1.1: https://github.com/oblalex/candv/compare/v1.1.0...v1.1.1
