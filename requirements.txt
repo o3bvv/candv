@@ -4,4 +4,4 @@
 #
 #     pip install -r requirements.pip
 
-six>=1.7.3
+six>=1.6.1

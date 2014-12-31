@@ -4,6 +4,7 @@ Misc
 This chapter covers miscellaneous things which are not related to the library
 usage.
 
+
 Tests
 ^^^^^
 
@@ -25,6 +26,7 @@ run::
 
     $ coverage run `which nosetests` --nocapture && coverage report -m
 
+
 Building docs
 ^^^^^^^^^^^^^
 
@@ -39,6 +41,7 @@ This will render docs in ``HTML`` format to ``docs/_build/html`` directory.
 To see all available output formats, run::
 
     $ make help
+
 
 .. _Travis CI: https://travis-ci.org/oblalex/candv
 .. _nose: https://nose.readthedocs.org/en/latest/

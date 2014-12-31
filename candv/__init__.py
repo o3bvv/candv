@@ -2,6 +2,9 @@
 """
 This module provides ready-to-use classes for constructing custom constants.
 """
+
+import six
+
 from .base import (
     Constant as SimpleConstant, ConstantsContainer as Constants,
     with_constant_class,
@@ -45,6 +48,17 @@ class VerboseMixin(object):
         group.verbose_name = self.verbose_name
         group.help_text = self.help_text
 
+    def to_primitive(self, context=None):
+        """
+        .. versionadded:: 1.2.1
+        """
+        primitive = super(VerboseMixin, self).to_primitive(context)
+        primitive.update({
+            'verbose_name': six.text_type(self.verbose_name),
+            'help_text': six.text_type(self.help_text),
+        })
+        return primitive
+
 
 class VerboseConstant(VerboseMixin, SimpleConstant):
     """
@@ -81,6 +95,21 @@ class ValueConstant(SimpleConstant):
         """
         super(ValueConstant, self).merge_into_group(group)
         group.value = self.value
+
+    def to_primitive(self, context=None):
+        """
+        .. versionadded:: 1.2.1
+        """
+        primitive = super(ValueConstant, self).to_primitive(context)
+        value = self.value
+
+        if hasattr(value, 'isoformat'):
+            value = value.isoformat()
+        elif callable(value):
+            value = value()
+
+        primitive['value'] = value
+        return primitive
 
 
 class VerboseValueConstant(VerboseMixin, ValueConstant):

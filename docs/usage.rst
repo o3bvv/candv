@@ -20,6 +20,7 @@ class methods. :doc:`See customization docs<customization>`.
 Constants may be converted into groups of constants providing ability to create
 different constant hierarchies (:ref:`see Hierarchies <hierarchies>`).
 
+
 .. _usage_simple_constants:
 
 Simple constants
@@ -98,6 +99,7 @@ And access its attributes::
     'STATUS.SUCCESS'
     >>> STATUS.SUCCESS.container
     <constants container 'STATUS'>
+
 
 .. _usage_valued_constants:
 
@@ -189,6 +191,9 @@ And of course, you can access values of constants:
     >>> TEAMS.RED.value
     '#F00'
 
+.. todo::
+
+
 .. _usage_verbose_constants:
 
 Verbose constants
@@ -273,6 +278,7 @@ attribute:
     {% endfor %}
     </select>
 
+
 .. _hierarchies:
 
 Hierarchies
@@ -318,3 +324,89 @@ same time::
     'TREE.LEFT.LEFT'
     >>> TREE.LEFT.LEFT.container
     <constants group 'TREE.LEFT'>
+
+
+.. _usage_exporting:
+
+Exporting
+---------
+
+.. versionadded:: 1.2.1
+
+You can convert constants and containers into Python primitives for further
+serialization, for example, into JSON.
+
+Use ``to_primitive()`` method of constants and containers to do that.
+
+Simple constants
+~~~~~~~~~~~~~~~~
+
+Let's see how it works with :ref:`simple constants <usage_simple_constants>`::
+
+    >>> STATUS.SUCCESS.to_primitive()
+    {'name': 'SUCCESS'}
+    >>> STATUS.to_primitive()
+    {'items': [{'name': 'SUCCESS'}, {'name': 'FAILURE'}], 'name': 'STATUS'}
+
+By default ``to_primitive()`` returns a :class:`dict` which contains at least
+a ``name``. In addition, containers have :class:`list` of their ``items``.
+
+Verbose constants
+~~~~~~~~~~~~~~~~~
+
+:ref:`Verbose constants <usage_verbose_constants>` work same way::
+
+    >>> TYPES.FOO.to_primitive()
+    {'help_text': 'help', 'verbose_name': 'Some foo constant', 'name': 'FOO'}
+
+Valued constants
+~~~~~~~~~~~~~~~~
+
+You can do that with :ref:`valued constants <usage_valued_constants>` as well::
+
+    >>> TEAMS.RED.to_primitive()
+    {'name': 'RED', 'value': '#F00'}
+
+.. note::
+
+    Remember: values of constants are out of scope of this library.
+
+    You can use anything as value of your constants, but converting values into
+    primitives is almost up to you.
+
+    If your value is ``callable``, ``candv`` will call it to get it's value.
+    If your value has ``isoformat()`` method (``date``, ``time``, etc.),
+    ``candv`` will call it either. Everything else is supposed to be a
+    primitive.
+
+    It is unlikely that you will use something complex, but if you will, than
+    it's strongly recommended to implement
+    :ref:`a custom constant class <customization>` with
+    :ref:`custom support of exporting <customization_exporting>`.
+
+Hierarchies
+~~~~~~~~~~~
+
+Hierarchies can be converted to primitives also::
+
+    >>> class FOO(Constants):
+    ...     A = SimpleConstant()
+    ...     B = VerboseValueConstant(
+    ...         value=10,
+    ...         verbose_name="Constant B",
+    ...         help_text="Just a group with verbose name"
+    ...     ).to_group(
+    ...         group_class=Constants,
+    ...         C=SimpleConstant(),
+    ...         D=SimpleConstant(),
+    ...     )
+    ...
+    >>> from pprint import pprint
+    >>> pprint(FOO.B.to_primitive())
+        {'help_text': 'Just a group with verbose name',
+         'items': [{'name': 'C'}, {'name': 'D'}],
+         'name': 'B',
+         'value': 10,
+         'verbose_name': 'Constant B'}
+
+As you can see, result is a mix of constant and container.

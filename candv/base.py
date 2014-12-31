@@ -6,7 +6,9 @@ stuff must be derived from them.
 Each container has :attr:`~ConstantsContainer.constant_class` attribute. It
 specifies class of constants which will be defined within contaner.
 """
+
 import six
+import types
 
 from collections import OrderedDict
 
@@ -85,6 +87,12 @@ class Constant(object):
         prefix = self.container.full_name if self.container else "__UNBOUND__"
         return "{0}.{1}".format(prefix, self.name)
 
+    def to_primitive(self, context=None):
+        """
+        .. versionadded:: 1.2.1
+        """
+        return {'name': self.name, }
+
     def __repr__(self):
         """
         Return text identifying both which constant this is and which
@@ -118,11 +126,27 @@ class _LazyConstantsGroup(object):
         group = type(full_name, (self.group_class, ), self.group_members)
         self.constant.merge_into_group(group)
 
+        to_primitive = self._get_to_primitive(self.constant, group)
+        group.to_primitive = types.MethodType(to_primitive, group)
+
         del self.constant
         del self.group_class
         del self.group_members
 
         return group
+
+    @staticmethod
+    def _get_to_primitive(group, constant):
+
+        group_primitive = group.to_primitive
+        constant_primitive = constant.to_primitive
+
+        def to_primitive(self, context=None):
+            primitive = group_primitive(context)
+            primitive.update(constant_primitive(context))
+            return primitive
+
+        return to_primitive
 
 
 class _ConstantsContainerMeta(type):
@@ -335,7 +359,7 @@ class _ConstantsContainerMeta(type):
         """
         return six.iteritems(self._constants)
 
-    #: *New since 1.1.2.*
+    #: .. versionadded:: 1.1.2
     #:
     #: Alias for :meth:`constants`.
     #: Added for consistency with dictionaries. Use :class:`~candv.Values` and
@@ -343,13 +367,22 @@ class _ConstantsContainerMeta(type):
     #: values.
     values = constants
 
-    #: *New since 1.1.2.*
+    #: .. versionadded:: 1.1.2
     #:
     #: Alias for :meth:`iterconstants`.
     #: Added for consistency with dictionaries. Use :class:`~candv.Values` and
     #: :meth:`~candv.Values.itervalues` if you need to have constants with real
     #: values.
     itervalues = iterconstants
+
+    def to_primitive(self, context=None):
+        """
+        .. versionadded:: 1.2.1
+        """
+        return {
+            'name': self.name,
+            'items': [x.to_primitive(context) for x in self.iterconstants()]
+        }
 
 
 @six.add_metaclass(_ConstantsContainerMeta)

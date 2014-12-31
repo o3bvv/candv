@@ -36,7 +36,11 @@ Adding support of groups
 ------------------------
 
 Well, everything looks fine. But what about creating a group from our new
-constants? First, let's create some constant::
+constants?
+
+.. note:: If you don't know what this means, see :ref:`hierarchies`.
+
+So, firstly, let's create some constant::
 
     >>> class FOO(Values):
     ...     BAR = Opcode(300).to_group(Values,
@@ -85,6 +89,61 @@ new attribute ``compose`` which is a reference to ``compose`` method of our
     Maybe it will be better for you to use some *lambda* or to define some
     method within ``merge_into_group``.
 
+.. _customization_exporting:
+
+Adding support of exporting
+---------------------------
+
+If your constant stores some complex objects, then it's strongly recommended
+to provide support of exporting for them (see :ref:`usage_exporting`).
+
+Do do that, you need to define ``to_primitive()`` method for your class.
+Example::
+
+    >>> from fractions import Fraction
+    >>> from pprint import pprint
+    >>> from candv import SimpleConstant, Constants
+    >>>
+    >>> class FractionConstant(SimpleConstant):
+    ...     def __init__(self, value):
+    ...         super(FractionConstant, self).__init__()
+    ...         self.value = value
+    ...
+    ...     def to_primitive(self, context=None):
+    ...         primitive = super(FractionConstant, self).to_primitive(context)
+    ...         primitive.update({
+    ...                'numerator': self.value.numerator,
+    ...                'denominator': self.value.denominator
+    ...         })
+    ...         return primitive
+    ...
+    >>> class Fractions(Constants):
+    ...     one_half = FractionConstant(Fraction(1, 2))
+    ...     one_third = FractionConstant(Fraction(1, 3))
+    ...
+    >>> Fractions.one_half.to_primitive()
+    {'denominator': 2, 'numerator': 1, 'name': 'one_half'}
+    >>> pprint(Fractions.to_primitive())
+    {'items': [{'denominator': 2, 'name': 'one_half', 'numerator': 1},
+               {'denominator': 3, 'name': 'one_third', 'numerator': 1}],
+     'name': 'Fractions'}
+
+.. note::
+
+    This example is quite hypothetical and it's intended just to show
+    implementation of custom ``to_primitive()`` method.
+
+The plot in a nutshell:
+
+    #. Define ``to_primitive()`` method which accepts ``context`` argument.
+    #. Call parent's method and get primitive.
+    #. Update that primitive with your data, which may depend on context.
+    #. Return updated primitive.
+
+Same can be applied to :ref:`custom constant containers <custom_containers>`
+as well.
+
+
 Adding verbosity
 ----------------
 
@@ -104,6 +163,7 @@ If you need to add verbosity to your constants, just use
 
     Here note, that during call of ``__init__`` method of the super class, you
     need to pass ``verbose_name`` and ``help_text`` as keyword arguments.
+
 
 .. _custom_containers:
 

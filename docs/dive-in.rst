@@ -10,6 +10,7 @@ constants by their names or values? What about combining groups of constants
 into an hierarchy? And finally, how do you imagine documenting process of this
 all?
 
+
 Simple example
 --------------
 
@@ -100,6 +101,7 @@ What attributes does it have?
     'BAR.ONE'
     >>> BAR.ONE.container
     <constants container 'BAR'>
+
 
 .. _complex-example:
 

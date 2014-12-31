@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+
 import unittest
 
+from datetime import date
 from candv import (
-    Constants, SimpleConstant, VerboseConstant,
-    Values, ValueConstant, VerboseValueConstant,
+    Constants, SimpleConstant, VerboseConstant, Values, ValueConstant,
+    VerboseValueConstant,
 )
 
 
@@ -18,25 +20,46 @@ class VerboseConstantTestCase(unittest.TestCase):
 
     def test_no_args(self):
         constant = self._create_constant()
-        self.assertEquals(constant.name, 'CONSTANT')
-        self.assertEquals(constant.full_name, 'FOO.CONSTANT')
+        self.assertEqual(constant.name, 'CONSTANT')
+        self.assertEqual(constant.full_name, 'FOO.CONSTANT')
         self.assertIsNone(constant.verbose_name)
         self.assertIsNone(constant.help_text)
 
     def test_versose_name(self):
         constant = VerboseConstant(verbose_name="foo")
-        self.assertEquals(constant.verbose_name, "foo")
+        self.assertEqual(constant.verbose_name, "foo")
 
     def test_help_text(self):
         constant = VerboseConstant(help_text="just test constant")
-        self.assertEquals(constant.help_text, "just test constant")
+        self.assertEqual(constant.help_text, "just test constant")
 
     def test_all_args(self):
         constant = self._create_constant("foo", "just test constant")
-        self.assertEquals(constant.name, 'CONSTANT')
-        self.assertEquals(constant.full_name, 'FOO.CONSTANT')
-        self.assertEquals(constant.verbose_name, "foo")
-        self.assertEquals(constant.help_text, "just test constant")
+        self.assertEqual(constant.name, 'CONSTANT')
+        self.assertEqual(constant.full_name, 'FOO.CONSTANT')
+        self.assertEqual(constant.verbose_name, "foo")
+        self.assertEqual(constant.help_text, "just test constant")
+
+    def test_to_primitive(self):
+        constant = self._create_constant()
+        self.assertEqual(
+            constant.to_primitive(),
+            {
+                'name': 'CONSTANT',
+                'verbose_name': None,
+                'help_text': None,
+            }
+        )
+
+        constant = self._create_constant("Constant", "A test constant")
+        self.assertEqual(
+            constant.to_primitive(),
+            {
+                'name': 'CONSTANT',
+                'verbose_name': "Constant",
+                'help_text': "A test constant",
+            }
+        )
 
 
 class ConstantsTestCase(unittest.TestCase):
@@ -47,7 +70,7 @@ class ConstantsTestCase(unittest.TestCase):
             two = SimpleConstant()
             one = SimpleConstant()
 
-        self.assertEquals(
+        self.assertEqual(
             [x.name for x in FOO.iterconstants()],
             ['two', 'one', ]
         )
@@ -58,10 +81,7 @@ class ConstantsTestCase(unittest.TestCase):
             one = SimpleConstant()
             one = SimpleConstant()
 
-        self.assertEquals(
-            [x.name for x in FOO.iterconstants()],
-            ['one', ]
-        )
+        self.assertEqual([x.name for x in FOO.iterconstants()], ['one', ])
 
     def test_mixed_constant_classes(self):
 
@@ -71,7 +91,7 @@ class ConstantsTestCase(unittest.TestCase):
             four = ValueConstant(4)
             three = VerboseValueConstant(3, "three", "just three")
 
-        self.assertEquals(
+        self.assertEqual(
             [x.name for x in FOO.iterconstants()],
             ['two', 'one', 'four', 'three', ]
         )
@@ -84,7 +104,7 @@ class ConstantsTestCase(unittest.TestCase):
             four = ValueConstant(4)
             three = VerboseValueConstant(3, "three", "just three")
 
-        self.assertEquals(
+        self.assertEqual(
             [x.name for x in FOO.iterconstants()],
             ['four', 'three', ]
         )
@@ -95,11 +115,7 @@ class ConstantsTestCase(unittest.TestCase):
             one = SimpleConstant()
             two = ValueConstant(2)
 
-        self.assertEquals(
-            [x.name for x in FOO.iterconstants()],
-            ['two', ]
-        )
-
+        self.assertEqual([x.name for x in FOO.iterconstants()], ['two', ])
         self.assertEqual(FOO.one.name, 'one')
         self.assertEqual(FOO.one.full_name, '__UNBOUND__.one')
         self.assertEqual(repr(FOO.one), "<constant '__UNBOUND__.one'>")
@@ -114,8 +130,8 @@ class ValuesTestCase(unittest.TestCase):
             TWO = ValueConstant(2)
             ONE_DUB = ValueConstant(1)
 
-        self.assertEquals(FOO.get_by_value(1), FOO.ONE)
-        self.assertEquals(FOO.get_by_value(2), FOO.get('TWO'))
+        self.assertEqual(FOO.get_by_value(1), FOO.ONE)
+        self.assertEqual(FOO.get_by_value(2), FOO.get('TWO'))
 
         with self.assertRaises(ValueError) as cm:
             FOO.get_by_value(3)
@@ -135,7 +151,7 @@ class ValuesTestCase(unittest.TestCase):
             THREE = ValueConstant(3)
             ONE_DUB1 = ValueConstant(1)
 
-        self.assertEquals(
+        self.assertEqual(
             [x.name for x in FOO.filter_by_value(1)],
             ['ONE', 'ONE_DUB2', 'ONE_DUB1', ]
         )
@@ -147,10 +163,7 @@ class ValuesTestCase(unittest.TestCase):
             FOUR = ValueConstant(4)
             THREE = ValueConstant(3)
 
-        self.assertEquals(
-            FOO.values(),
-            [1, 4, 3, ]
-        )
+        self.assertEqual(FOO.values(), [1, 4, 3, ])
 
     def test_itervalues(self):
 
@@ -159,9 +172,37 @@ class ValuesTestCase(unittest.TestCase):
             FOUR = ValueConstant(4)
             THREE = ValueConstant(3)
 
-        self.assertEquals(
-            list(FOO.itervalues()),
-            [1, 4, 3, ]
+        self.assertEqual(list(FOO.itervalues()), [1, 4, 3, ])
+
+    def test_to_primitive(self):
+
+        class FOO(Values):
+            ONE = ValueConstant(1)
+            TWO = ValueConstant(lambda: 2)
+            DATE = ValueConstant(date(1999, 12, 31))
+
+        self.assertEqual(
+            FOO.ONE.to_primitive(),
+            {'name': 'ONE', 'value': 1, }
+        )
+        self.assertEqual(
+            FOO.TWO.to_primitive(),
+            {'name': 'TWO', 'value': 2, }
+        )
+        self.assertEqual(
+            FOO.DATE.to_primitive(),
+            {'name': 'DATE', 'value': '1999-12-31', }
+        )
+        self.assertEqual(
+            FOO.to_primitive(),
+            {
+                'name': 'FOO',
+                'items': [
+                    {'name': 'ONE', 'value': 1, },
+                    {'name': 'TWO', 'value': 2, },
+                    {'name': 'DATE', 'value': '1999-12-31', },
+                ]
+            }
         )
 
 
@@ -180,11 +221,26 @@ class GrouppingTestCase(unittest.TestCase):
                 D=SimpleConstant(),
             )
 
-        self.assertEquals(FOO.B.verbose_name, "Constant B")
-        self.assertEquals(FOO.B.help_text, "Just a group with verbose name")
-        self.assertEquals(
-            FOO.B.names(),
-            ['C', 'D', ]
+        self.assertEqual(FOO.B.verbose_name, "Constant B")
+        self.assertEqual(FOO.B.help_text, "Just a group with verbose name")
+        self.assertEqual(FOO.B.names(), ['C', 'D', ])
+        self.assertEqual(
+            FOO.to_primitive(),
+            {
+                'name': "FOO",
+                'items': [
+                    {'name': "A", },
+                    {
+                        'name': "B",
+                        'verbose_name': "Constant B",
+                        'help_text': "Just a group with verbose name",
+                        'items': [
+                            {'name': "C", },
+                            {'name': "D", },
+                        ],
+                    },
+                ]
+            }
         )
 
     def test_valuable_group(self):
@@ -197,10 +253,24 @@ class GrouppingTestCase(unittest.TestCase):
                 D=SimpleConstant(),
             )
 
-        self.assertEquals(FOO.B.value, 10)
-        self.assertEquals(
-            FOO.B.names(),
-            ['C', 'D', ]
+        self.assertEqual(FOO.B.value, 10)
+        self.assertEqual(FOO.B.names(), ['C', 'D', ])
+        self.assertEqual(
+            FOO.to_primitive(),
+            {
+                'name': "FOO",
+                'items': [
+                    {'name': "A", },
+                    {
+                        'name': "B",
+                        'value': 10,
+                        'items': [
+                            {'name': "C", },
+                            {'name': "D", },
+                        ],
+                    },
+                ]
+            }
         )
 
     def test_valuable_verbose_group(self):
@@ -217,10 +287,26 @@ class GrouppingTestCase(unittest.TestCase):
                 D=SimpleConstant(),
             )
 
-        self.assertEquals(FOO.B.value, 10)
-        self.assertEquals(FOO.B.verbose_name, "Constant B")
-        self.assertEquals(FOO.B.help_text, "Just a group with verbose name")
-        self.assertEquals(
-            FOO.B.names(),
-            ['C', 'D', ]
+        self.assertEqual(FOO.B.value, 10)
+        self.assertEqual(FOO.B.verbose_name, "Constant B")
+        self.assertEqual(FOO.B.help_text, "Just a group with verbose name")
+        self.assertEqual(FOO.B.names(), ['C', 'D', ])
+        self.assertEqual(
+            FOO.to_primitive(),
+            {
+                'name': "FOO",
+                'items': [
+                    {'name': "A", },
+                    {
+                        'name': "B",
+                        'verbose_name': "Constant B",
+                        'help_text': "Just a group with verbose name",
+                        'value': 10,
+                        'items': [
+                            {'name': "C", },
+                            {'name': "D", },
+                        ],
+                    },
+                ]
+            }
         )
