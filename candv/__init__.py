@@ -53,9 +53,10 @@ class VerboseMixin(object):
         .. versionadded:: 1.2.1
         """
         primitive = super(VerboseMixin, self).to_primitive(context)
+        to_text = lambda x: six.text_type(x) if x is not None else x
         primitive.update({
-            'verbose_name': six.text_type(self.verbose_name),
-            'help_text': six.text_type(self.help_text),
+            'verbose_name': to_text(self.verbose_name),
+            'help_text': to_text(self.help_text),
         })
         return primitive
 
