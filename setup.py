@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import os
 
 from setuptools import setup, find_packages
@@ -14,7 +15,7 @@ REQUIREMENTS = [
 
 setup(
     name='candv',
-    version='1.3.0',
+    version='1.3.1',
     description="Constants and Values: create grouped non-standard named "
                 "constants, add values, verbose names, help texts or anything "
                 "you like to them",

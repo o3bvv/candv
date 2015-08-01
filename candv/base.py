@@ -100,6 +100,27 @@ class Constant(object):
         """
         return "<constant '{0}'>".format(self.full_name)
 
+    def __hash__(self):
+        """
+        .. versionadded:: 1.3.1
+        """
+        return hash(self.full_name)
+
+    def __eq__(self, other):
+        """
+        .. versionadded:: 1.3.1
+        """
+        if not isinstance(other, Constant):
+            return False
+
+        return self.full_name == other.full_name
+
+    def __ne__(self, other):
+        """
+        .. versionadded:: 1.3.1
+        """
+        return not (self == other)
+
 
 class _LazyConstantsGroup(object):
 

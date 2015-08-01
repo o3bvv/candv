@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+
+import os
+import sys
 import unittest
 
 from candv.base import Constant, ConstantsContainer, with_constant_class
@@ -432,3 +435,17 @@ class GrouppingTestCase(unittest.TestCase):
                 ]
             }
         )
+
+    def test_comparison(self):
+        sys.path.insert(
+            0,
+            os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                'package',
+            )
+        )
+        from package.subpackage.constants import CONSTANTS
+        from subpackage.constants import CONSTANTS as SUBCONSTANTS
+
+        self.assertNotEqual(CONSTANTS.__module__, SUBCONSTANTS.__module__)
+        self.assertEqual(CONSTANTS.PRIMARY, SUBCONSTANTS.PRIMARY)
