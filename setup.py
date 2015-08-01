@@ -10,7 +10,7 @@ __here__ = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(__here__, 'README.rst')).read()
 REQUIREMENTS = [
     i.strip() for i in
-    open(os.path.join(__here__, 'requirements.txt')).readlines()
+    open(os.path.join(__here__, 'requirements', 'dist.txt')).readlines()
 ]
 
 setup(

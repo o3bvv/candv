@@ -1,0 +1,4 @@
+coveralls
+
+-r dist.txt
+-r test.txt
