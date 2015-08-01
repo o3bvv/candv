@@ -444,7 +444,7 @@ class GrouppingTestCase(unittest.TestCase):
                 'package',
             )
         )
-        from package.subpackage.constants import CONSTANTS
+        from .package.subpackage.constants import CONSTANTS
         from subpackage.constants import CONSTANTS as SUBCONSTANTS
 
         self.assertNotEqual(CONSTANTS.__module__, SUBCONSTANTS.__module__)
