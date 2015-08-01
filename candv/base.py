@@ -110,10 +110,8 @@ class Constant(object):
         """
         .. versionadded:: 1.3.1
         """
-        if not isinstance(other, Constant):
-            return False
-
-        return self.full_name == other.full_name
+        return (isinstance(other, Constant)
+                and (self.full_name == other.full_name))
 
     def __ne__(self, other):
         """
