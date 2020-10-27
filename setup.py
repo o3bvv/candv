@@ -23,7 +23,7 @@ setup(
     keywords=[
         'constants', 'values', 'structures', 'choices',
     ],
-    license='LGPLv3',
+    license='MIT',
     url='https://github.com/oblalex/candv',
     author='Alexander Oblovatniy',
     author_email='oblovatniy@gmail.com',
@@ -32,7 +32,7 @@ setup(
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
+        'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2.7',
