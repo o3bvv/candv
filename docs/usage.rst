@@ -1,24 +1,17 @@
 Usage
 =====
 
-The main idea is that ``constants`` are *instances* of
-:class:`~candv.base.Constant` class (or its subclasses) and they are stored
-inside *subclasses* of :class:`~candv.base.ConstantsContainer` class which are
-called ``containers``.
+The concept behind ``candv`` is that constants are grouped together into containers.
 
-Every constant has its own name which is equal to the name of container's
-attribure they are assigned to. Every container is a singleton, i.e. you just
-need to define container's class and use it. You are not permitted to create
-instances of containers. This is unnecessary. Containers have class methods
-for accessing constants in different ways.
+Those containers are special classes having constants as class attributes. All containers are created by subclassing :class:`~candv.Constants`. Containers cannot be instantiated.
 
-Constants remember the order they were defined inside container.
+In their turn, constants are special objects, which are instances of :class:`~candv.SimpleConstant` or of its derivatives.
 
-Constants may have custom attributes and methods. Containers may have custom
-class methods. :doc:`See customization docs<customization>`.
+As containers are classes and constants are instances of classes, they can and actually have own methods and attributes.
 
-Constants may be converted into groups of constants providing ability to create
-different constant hierarchies (:ref:`see Hierarchies <hierarchies>`).
+It is possible to add custom functionality simply by subclassing :class:`~candv.Constants` and :class:`~candv.SimpleConstant` respectively.
+
+In addition to the basic constants and basic containers, ``candv`` also provides extended ones like :class:`~candv.VerboseConstant`, :class:`~candv.ValueConstant`, :class:`~candv.Values`, etc.
 
 
 .. _usage_simple_constants:
@@ -26,79 +19,158 @@ different constant hierarchies (:ref:`see Hierarchies <hierarchies>`).
 Simple constants
 ----------------
 
-Simple constants are really simple. They look like `enumerations in Python 3.4 <https://docs.python.org/3/library/enum.html>`_::
+Simple constants are really simple. They do not have any particular values attached and resemble :class:`enum.Enum` used with :class:`enum.auto`:
 
-    >>> from candv import SimpleConstant, Constants
-    >>> class STATUS(Constants):
-    ...     SUCCESS = SimpleConstant()
-    ...     FAILURE = SimpleConstant()
-    ...
+.. code-block:: python
+  :linenos:
 
-And they can be used just like enumerations.
+  from candv import Constants
+  from candv import SimpleConstant
 
-Here ``STATUS`` is a subclass of :class:`candv.Constants`. The latter can
-contain any instances of :class:`candv.SimpleConstant` class or its subclasses.
+
+  class STATUS(Constants):
+    SUCCESS = SimpleConstant()
+    FAILURE = SimpleConstant()
+
+
+Here, ``STATUS`` is a subclass of :class:`~candv.Constants`. It acts as a container:
+
+.. code-block:: python
+  :linenos:
+  :lineno-start: 8
+
+  >>> STATUS
+  <constants container 'STATUS'>
+
+
+All containers have the following attributes:
+
+* ``name``
+* ``full_name``
+
+
+By default they are equal to the name of the class itself:
+
+.. code-block:: python
+  :linenos:
+  :lineno-start: 10
+
+  >>> STATUS.name
+  'STATUS'
+
+  >>> STATUS.full_name
+  'STATUS'
+
 
 .. note::
 
-    ``candv.SimpleConstant`` and ``candv.Constants`` are aliases for
-    :class:`candv.base.Constant` and :class:`candv.base.ConstantsContainer`
-    respectively.
+  If there is a reason on the Earth to define custom names, it can be done:
 
-``STATUS`` is a container::
+  .. code-block:: python
 
-    >>> STATUS
-    <constants container 'STATUS'>
+    class STATUS(Constants):
+      name = "foo"
+      full_name = f"package.{name}"
 
-All containers have the following attributes::
+      SUCCESS = SimpleConstant()
+      FAILURE = SimpleConstant()
 
-    >>> STATUS.name
-    'STATUS'
-    >>> STATUS.full_name
-    'STATUS'
 
-They have an API which is similar to the API of Python's :class:`dict` (in the
-mater of accessing its members):
+The same attributes are available to all constants as well:
 
-::
+.. code-block:: python
+  :linenos:
+  :lineno-start: 15
 
-    >>> len(STATUS)
-    2
-    >>> 'SUCCESS' in STATUS
-    True
-    >>> STATUS.has_name('PENDING')
-    False
-    >>> STATUS.names()
-    ['SUCCESS', 'FAILURE']
-    >>> STATUS.constants()
+  >>> STATUS.SUCCESS.name
+  'SUCCESS'
+
+  >>> STATUS.SUCCESS.full_name
+  'STATUS.SUCCESS'
+
+
+As can be seen from the above, names of constants are equal to the names of container's attributes. And full names combine names of constants with full names of their containers. Custom values are not allowed.
+
+Next, all containers have a member-access API similar to the API of Python's :class:`dict`:
+
+.. code-block:: python
+  :linenos:
+  :lineno-start: 20
+
+  >>> STATUS.names()
+  ['SUCCESS', 'FAILURE']
+
+  >>> STATUS.iternames()
+  <odict_iterator object at 0x7f289fa6e680>
+
+  >>> STATUS.constants()
+  [<constant 'STATUS.SUCCESS'>, <constant 'STATUS.FAILURE'>]
+
+  >>> STATUS.iterconstants()
+  <odict_iterator object at 0x7f289fa6ecc0>
+
+  >>> STATUS.items()
+  [('SUCCESS', <constant 'STATUS.SUCCESS'>), ('FAILURE', <constant 'STATUS.FAILURE'>)]
+
+  >>> STATUS.iteritems()
+  <odict_iterator object at 0x7f289fa1e360>
+
+  >>> list(STATUS)
+  ['SUCCESS', 'FAILURE']
+
+  >>> len(STATUS)
+  2
+
+  >>> STATUS['SUCCESS']
+  <constant 'STATUS.SUCCESS'>
+
+  >>> 'SUCCESS' in STATUS
+  True
+
+  >>> STATUS.has_name('PENDING')
+  False
+
+  >>> STATUS.get('XXX')
+  None
+
+  >>> STATUS.get('XXX', default=999)
+  999
+
+
+.. note::
+
+  Since 1.1.2 it is possible to list constants and get the same result by calling :meth:`~candv.Constants.values` and
+  :meth:`~candv.Constants.itervalues`:
+
+  .. code-block:: python
+
+    >>> STATUS.values()
     [<constant 'STATUS.SUCCESS'>, <constant 'STATUS.FAILURE'>]
-    >>> STATUS.items()
-    [('SUCCESS', <constant 'STATUS.SUCCESS'>), ('FAILURE', <constant 'STATUS.FAILURE'>)]
-    >>> STATUS['FAILURE']
-    <constant 'STATUS.FAILURE'>
-    >>> STATUS.get('XXX', 999)
-    999
 
-.. note::
+    >>> STATUS.itervalues()
+    <odict_iterator object at 0x7f289fa17b30>
 
-    Since 1.1.2 you can list constants and get the same result by calling
-    :meth:`~candv.base.ConstantsContainer.values` and
-    :meth:`~candv.base.ConstantsContainer.itervalues` also. Take into account,
-    those methods are overridden in :class:`~candv.Values` (see section below).
+  These methods are overridden in :class:`~candv.Values` (see the section below).
 
-Also, you can access constants directly::
 
-    >>> STATUS.SUCCESS
-    <constant 'STATUS.SUCCESS'>
+In addition to the item-access, containers also provide a dot-access for their constants:
 
-And access its attributes::
+.. code-block:: python
+  :linenos:
+  :lineno-start: 58
 
-    >>> STATUS.SUCCESS.name
-    'SUCCESS'
-    >>> STATUS.SUCCESS.full_name
-    'STATUS.SUCCESS'
-    >>> STATUS.SUCCESS.container
-    <constants container 'STATUS'>
+  >>> STATUS.SUCCESS
+  <constant 'STATUS.SUCCESS'>
+
+
+Finally, every constant has access to own containers via the ``container`` attribute:
+
+.. code-block:: python
+  :linenos:
+  :lineno-start: 60
+
+  >>> STATUS.SUCCESS.container
+  <constants container 'STATUS'>
 
 
 .. _usage_valued_constants:
@@ -106,92 +178,96 @@ And access its attributes::
 Constants with values
 ---------------------
 
-Constants with values behave like simple constants, except they can have any
-object attached to them as a value. It's something like an ordered dictionary::
+Constants with values are created via :class:`~candv.ValueConstant` and can have arbitrary values attached to them.
 
-    >>> from candv import ValueConstant, Values
-    >>> class TEAMS(Values):
-    ...     NONE = ValueConstant('#EEE')
-    ...     RED = ValueConstant('#F00')
-    ...     BLUE = ValueConstant('#00F')
-    ...
+Such constants have to be contained by derivatives of :class:`~candv.Values` class. This enables additional functionality like inverse lookups, i.e. lookups of constants by their values.
 
-Here ``TEAMS`` is a subclass of :class:`~candv.Values`, which is a more
-specialized container than :class:`~candv.Constants`. As you may guessed,
-:class:`~candv.ValueConstant` is a more specialized constant class than
-``SimpleConstant`` and its instances have own values.
+.. code-block:: python
+  :linenos:
 
-.. note::
-
-    ``Values`` and its subclasses treat as constants only instances of ``ValueConstant`` or its sublasses::
-
-        >>> class UNBOUND_CONSTANTS(Values):
-        ...     FOO = SimpleConstant()
-        ...     BAR = SimpleConstant()
-        ...
-
-    Here ``UNBOUND_CONSTANTS`` container contains 2 instances of
-    ``SimpleConstant``, which is more gerenal then ``ValueConstant``. It's not an
-    error, but those 2 constants will be invisible for the container::
-
-        >>> UNBOUND_CONSTANTS.constants()
-        []
-        >>> UNBOUND_CONSTANTS.FOO
-        <constant '__UNBOUND__.FOO'>
-
-So, ``TEAMS`` is just another container::
-
-    >>> TEAMS
-    <constants container 'TEAMS'>
-
-It has extra methods for working with valued constants. For example, you can
-list all values::
-
-    >>> TEAMS.values()
-    ['#EEE', '#F00', '#00F']
-
-.. note::
-
-    Since 1.1.2 methods :meth:`~candv.Values.values` and
-    :meth:`~candv.Values.itervalues` from :class:`~candv.Values` override
-    methods :meth:`~candv.base.ConstantsContainer.values` and
-    :meth:`~candv.base.ConstantsContainer.itervalues` from
-    :class:`~candv.base.ConstantsContainer` accordingly.
-
-And you can get a constant by its value::
-
-    >>> TEAMS.get_by_value('#F00')
-    <constant 'TEAMS.RED'>
+  from candv import ValueConstant
+  from candv import Values
 
 
-If you have different constants with equal values, it's OK anyway::
+  class TEAMS(Values):
+    NONE = ValueConstant('#EEE')
+    RED  = ValueConstant('#F00')
+    BLUE = ValueConstant('#00F')
 
-    >>> class FOO(Values):
-    ...     ATTR1 = ValueConstant('one')
-    ...     ATTRX = ValueConstant('x')
-    ...     ATTR2 = ValueConstant('two')
-    ...     ATTR1_DUB = ValueConstant('one')
-    ...
 
-Here ``FOO.ATTR1`` and ``FOO.ATTR1_DUB`` have identical values. In this case
-method :meth:`~candv.Values.get_by_value` will return first constant with given
-value::
+Here, ``TEAMS`` is a subclass of :class:`~candv.Values`, which is a specialized version of :class:`~candv.Constants`. And :class:`~candv.ValueConstant` is a specialized version of :class:`~candv.SimpleConstant`:
 
-    >>> FOO.get_by_value('one')
-    <constant 'FOO.ATTR1'>
+.. code-block:: python
+  :linenos:
+  :lineno-start: 9
 
-If you need to get all constants with same value, use
-:meth:`~candv.Values.filter_by_value` method instead::
+  >>> Values.mro()
+  [<constants container 'Values'>, <constants container 'Constants'>, <class 'object'>]
 
-    >>> FOO.filter_by_value('one')
-    [<constant 'FOO.ATTR1'>, <constant 'FOO.ATTR1_DUB'>]
+  >>> ValueConstant.mro()
+  [<class 'candv.ext.ValueConstant'>, <class 'candv.core.SimpleConstant'>, <class 'object'>]
 
-And of course, you can access values of constants:
 
-    >>> TEAMS.RED.value
-    '#F00'
+So, ``TEAMS`` has all of the attributes and methods described above. Its :meth:`~candv.Values.values` method returns actual values of its constants:
 
-.. todo::
+.. code-block:: python
+  :linenos:
+  :lineno-start: 14
+
+  >>> TEAMS.values()
+  ['#EEE', '#F00', '#00F']
+
+  >>> TEAMS.itervalues()
+  <map object at 0x7f289fa54ac0>
+
+
+Values of constants themselves are also accessible:
+
+.. code-block:: python
+  :linenos:
+  :lineno-start: 19
+
+  >>> TEAMS.RED.value
+  '#F00'
+
+
+In addition to the previously mentioned ``get()`` method, :class:`~candv.Values` provides :meth:`~candv.Values.get_by_value` method:
+
+.. code-block:: python
+  :linenos:
+  :lineno-start: 21
+
+  >>> TEAMS.get_by_value('#F00')
+  <constant 'TEAMS.RED'>
+
+
+It is allowed for constants to have multiple constants with same values. However, in such case the :meth:`~candv.Values.get_by_value` method will return the first matching constant considering the order constants are defined:
+
+.. code-block:: python
+  :linenos:
+
+  class FOO(Values):
+    ATTR1     = ValueConstant('one')
+    ATTR2     = ValueConstant('two')
+    ATTR1_DUB = ValueConstant('one')
+
+
+.. code-block:: python
+  :linenos:
+  :lineno-start: 5
+
+  >>> FOO.get_by_value('one')
+  <constant 'FOO.ATTR1'>
+
+
+If there is a real need to have multiple constants with same values, it's possible to get all of them by their value using :meth:`~candv.Values.filter_by_value` method:
+
+.. code-block:: python
+  :linenos:
+  :lineno-start: 7
+
+  >>> FOO.filter_by_value('one')
+  [<constant 'FOO.ATTR1'>, <constant 'FOO.ATTR1_DUB'>]
 
 
 .. _usage_verbose_constants:
@@ -199,84 +275,144 @@ And of course, you can access values of constants:
 Verbose constants
 -----------------
 
-How often do you do things like below?
+Verbose constants are special constants with human-readable names and help messages.
 
-    >>> TYPE_FOO = 'foo'
-    >>> TYPE_BAR = 'bar'
-    >>> TYPES = (
-    ...     (TYPE_FOO, "Some foo constant"),
-    ...     (TYPE_BAR, "Some bar constant"),
-    ... )
+They can be useful when there's a need to present constants as possible choices to a user.
 
-This is usually done to add verbose names to constants which you can use
-somewhere, e.g in HTML template:
+Usually, this is achieved by defining each constant literal as a separate global variable, followed by construction of a lookup dictionary or tuple:
 
-.. code-block:: jinja
+.. code-block:: python
+  :linenos:
 
-    <select>
-    {% for code, name in TYPES %}
-      <option value='{{ code }}'>{{ name }}</option>
-    {% endfor %}
-    </select>
+  COUNTRY_AU = 'au'
+  COUNTRY_UK = 'uk'
+  COUNTRY_US = 'us'
 
-Okay. How about adding help text? Extend tuples? Or maybe create some
-``TYPES_DESCRIPTIONS`` tuple? How far can you go and how ugly can you make it?
-Well, spare yourself from headache and use verbose constants
-:class:`~candv.VerboseConstant` and :class:`~candv.VerboseValueConstant`::
+  COUNTRIES_NAMES = (
+    (COUNTRY_AU, "Australia"),
+    (COUNTRY_UK, "United States"),
+    (COUNTRY_US, "United Kingdom"),
+  )
 
-    >>> from candv import VerboseConstant, Constants
-    >>> class TYPES(Constants):
-    ...     FOO = VerboseConstant("Some foo constant", "help")
-    ...     BAR = VerboseConstant(verbose_name="Some bar constant",
-    ...                           help_text="some help")
 
-Here you can access ``verbose_name`` and ``help_text`` attributes of
-constants::
+This is hard to use and to maintain already. And its very common for names to come with descriptions or help texts, which means additional complexity.
 
-    >>> TYPES.FOO.verbose_name
-    'Some foo constant'
-    >>> TYPES.FOO.help_text
-    'help'
+In the contrast, it's possible to use :class:`~candv.VerboseConstant` to keep definitions coupled and concise:
 
-Now you can rewrite your code:
+.. code-block:: python
+  :linenos:
 
-.. code-block:: jinja
+  from candv import Constants
+  from candv import VerboseConstant
 
-    <select>
-    {% for constant in TYPES.constants() %}
-      <option value='{{ constant.name }}' title='{{ constant.help_text }}'>
-        {{ constant.verbose_name }}
-      </option>
-    {% endfor %}
-    </select>
 
-Same thing with values, just use ``VerboseValueConstant``::
+  class Countries(Constants):
+    au = VerboseConstant("Australia")
+    uk = VerboseConstant("United Kingdom")
+    us = VerboseConstant(
+      verbose_name="United States",
+      help_text="optional description",
+    )
 
-    >>> from candv import VerboseValueConstant, Values
-    >>> class TYPES(Values):
-    ...     FOO = VerboseValueConstant('foo', "Some foo constant", "help")
-    ...     BAR = VerboseValueConstant('bar', verbose_name="Some bar constant",
-    ...                                       help_text="some help")
-    ...
-    >>> TYPES.FOO.value
-    'foo'
-    >>> TYPES.FOO.verbose_name
-    'Some foo constant'
-    >>> TYPES.FOO.help_text
-    'help'
 
-Our sample HTML block will look almost the same and will use ``value``
-attribute:
+Verbose constants are derived from :class:`~candv.SimpleConstant` in their nature:
 
-.. code-block:: jinja
+.. code-block:: python
+  :linenos:
+  :lineno-start: 12
 
-    <select>
-    {% for constant in TYPES.constants() %}
-      <option value='{{ constant.value }}' title='{{ constant.help_text }}'>
-        {{ constant.verbose_name }}
-      </option>
-    {% endfor %}
-    </select>
+  >>> VerboseConstant.mro()
+  [<class 'candv.ext.VerboseConstant'>, <class 'candv.ext.VerboseMixin'>, <class 'candv.core.SimpleConstant'>, <class 'object'>]
+
+And in addition to the basic attributes of :class:`~candv.SimpleConstant`, instances of :class:`~candv.VerboseConstant` have extra optional attributes:
+
+* ``verbose_name``
+* ``help_text``
+
+.. code-block:: python
+  :linenos:
+  :lineno-start: 14
+
+  >>> Countries.au.name
+  'au'
+
+  >>> Countries.au.verbose_name
+  'Australia'
+
+  >>> Countries.au.help_text
+  None
+
+  >>> Countries.us.help_text
+  'optional description'
+
+
+Attributes of verbose constants can be lazy translations, for example, provided by verboselib_ or, say, `Django translation strings`_:
+
+.. code-block:: python
+  :linenos:
+
+  from candv import Constants
+  from candv import VerboseConstant
+
+  from verboselib import Translations
+
+
+  translations = Translations(
+    domain="the_app",
+    locale_dir_path="locale",
+  )
+  _ = translations.gettext_lazy
+
+
+  class UnitType(Constants):
+    aircraft = VerboseConstant(_("aircraft"))
+    ship     = VerboseConstant(_("ship"))
+    train    = VerboseConstant(_("train"))
+    vehicle  = VerboseConstant(_("vehicle"))
+
+
+.. _usage_verbose_constants_with_values:
+
+Verbose constants with values
+-----------------------------
+
+Another type of constants supported by ``candv`` out of the box are verbose constants with values.
+
+Intuitively, the constant class which allows that is :class:`~candv.VerboseValueConstant`:
+
+Obviously, it needs to be contained by :class:`~candv.Values` or by its derivatives:
+
+.. code-block:: python
+  :linenos:
+
+  from candv import Values
+  from candv import VerboseValueConstant
+
+
+  class SkillLevel(Values):
+    rki = VerboseValueConstant(0, "rookie")
+    avg = VerboseValueConstant(1, "average")
+    vtn = VerboseValueConstant(2, "veteran")
+    ace = VerboseValueConstant(3, "ace")
+
+
+Here, constants have attributes of both :class:`~candv.ValueConstant` and :class:`~candv.VerboseConstant`:
+
+.. code-block:: python
+  :linenos:
+  :lineno-start: 10
+
+  >>> VerboseValueConstant.mro()
+  [<class 'candv.ext.VerboseValueConstant'>, <class 'candv.ext.VerboseMixin'>, <class 'candv.ext.ValueConstant'>, <class 'candv.core.SimpleConstant'>, <class 'object'>]
+
+  >>> SkillLevel.avg.name
+  'avg'
+
+  >>> SkillLevel.avg.full_name
+  'SkillLevel.avg'
+
+  >>> SkillLevel.avg.value
+  1
 
 
 .. _hierarchies:
@@ -284,129 +420,208 @@ attribute:
 Hierarchies
 -----------
 
-**candv** library supports direct attaching of a group of constants to another
-constant to create hierarchies. A group can be created from any constant and
-any container can be used to store children. You may already saw this in the
-:ref:`introduction chapter <complex-example>`, but let's examine simple
-example::
+``candv`` library supports an exotic feature of constants hierarchies. This enables creation of subconstants:
 
-    >>> from candv import Constants, SimpleConstant
-    >>> class TREE(Constants):
-    ...     LEFT = SimpleConstant().to_group(Constants,
-    ...         LEFT=SimpleConstant(),
-    ...         RIGHT=SimpleConstant(),
-    ...     )
-    ...     RIGHT = SimpleConstant().to_group(Constants,
-    ...         LEFT=SimpleConstant(),
-    ...         RIGHT=SimpleConstant(),
-    ...     )
-    ...
+.. code-block:: python
+  :linenos:
 
-Here the key point is :meth:`~candv.base.Constant.to_group` method which is
-avaivable for every constant. It accepts class that will be used to construct
-new container and any number of constant instances passed as keywords. You can
-access any group as any usual constant and use it as any usual container at the
-same time::
-
-    >>> TREE.LEFT
-    <constants group 'TREE.LEFT'>
-    >>> TREE.LEFT.name
-    'LEFT'
-    >>> TREE.LEFT.full_name
-    'TREE.LEFT'
-    >>> TREE.LEFT.constant_class
-    <class 'candv.base.Constant'>
-    >>> TREE.LEFT.names()
-    ['LEFT', 'RIGHT']
-    >>> TREE.LEFT.LEFT
-    <constant 'TREE.LEFT.LEFT'>
-    >>> TREE.LEFT.LEFT.full_name
-    'TREE.LEFT.LEFT'
-    >>> TREE.LEFT.LEFT.container
-    <constants group 'TREE.LEFT'>
+  from candv import Constants
+  from candv import SimpleConstant
 
 
-.. _usage_exporting:
+  class TREE(Constants):
+    LEFT = SimpleConstant().to_group(Constants,
+      LEFT  = SimpleConstant(),
+      RIGHT = SimpleConstant(),
+    )
+    RIGHT = SimpleConstant().to_group(Constants,
+      LEFT  = SimpleConstant(),
+      RIGHT = SimpleConstant(),
+    )
 
-Exporting
----------
+
+Here, the key point is :meth:`~candv.SimpleConstant.to_group` method. It turns a constant into a ``group``, which is both a constant and a container.
+
+As for the arguments, the :meth:`~candv.SimpleConstant.to_group` method accepts a class that will be used to construct new container and  instances of constants passed as keywords.
+
+Groups can be created from any constant and any container can be used to store subconstants.
+
+.. code-block:: python
+  :linenos:
+  :lineno-start: 14
+
+  >>> TREE.LEFT
+  <constants group 'TREE.LEFT'>
+
+  >>> TREE.LEFT.name
+  'LEFT'
+
+  >>> TREE.LEFT.full_name
+  'TREE.LEFT'
+
+  >>> TREE.LEFT.constant_class
+  <class 'candv.base.Constant'>
+
+  >>> TREE.LEFT.names()
+  ['LEFT', 'RIGHT']
+
+  >>> TREE.LEFT.LEFT
+  <constant 'TREE.LEFT.LEFT'>
+
+  >>> TREE.LEFT.LEFT.full_name
+  'TREE.LEFT.LEFT'
+
+  >>> TREE.LEFT.LEFT.container
+  <constants group 'TREE.LEFT'>
+
+
+Serialization
+-------------
+
+There are several ways to serialize ``candv`` constants:
+
+* Using :mod:`pickle`.
+* Converting to a primitive and then to a JSON or similar.
+
+
+Pickling
+~~~~~~~~
+
+Usually, pickling should be avoided. However, there are situations, when it cannot be avoided, e.g., when passing data to and from subprocesses, etc. If pickled objects really can be trusted, they are good to go.
+
+``candv`` constants are ``pickle``-able. For example, there's a definition of ``STATUS`` in a ``constants.py`` module:
+
+.. code-block:: python
+  :linenos:
+
+  # constants.py
+  from candv import Constants
+  from candv import SimpleConstant
+
+
+  class STATUS(Constants):
+    SUCCESS = SimpleConstant()
+    FAILURE = SimpleConstant()
+
+
+One process can create a variable and pickle it into a file:
+
+.. code-block:: python
+  :linenos:
+
+  import pickle
+
+  from constants import STATUS
+
+
+  status = STATUS.SUCCESS
+
+  with open('foo.pkl', 'wb') as f:
+    pickle.dump(status, f)
+
+
+And another process can restore the value:
+
+.. code-block:: python
+  :linenos:
+
+  import pickle
+
+  with open('foo.pkl', 'rb') as f:
+    status = pickle.load(f)
+
+
+.. code-block:: python
+  :linenos:
+  :lineno-start: 5
+
+  >>> status
+  <constant 'STATUS.SUCCESS'>
+
+
+.. _usage_to_primitives:
+
+Converting to primitives
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. versionadded:: 1.3.0
 
-You can convert constants and containers into Python primitives for further
-serialization, for example, into JSON.
+Constants and containers can be converted into Python primitives for further serialization, for example, into JSONs.
 
-Use ``to_primitive()`` method of constants and containers to do that.
+This is done via ``to_primitive()`` method.
 
-Simple constants
-~~~~~~~~~~~~~~~~
+For example, for simple constants defined previously:
 
-Let's see how it works with :ref:`simple constants <usage_simple_constants>`::
+.. code-block:: python
 
-    >>> STATUS.SUCCESS.to_primitive()
-    {'name': 'SUCCESS'}
-    >>> STATUS.to_primitive()
-    {'items': [{'name': 'SUCCESS'}, {'name': 'FAILURE'}], 'name': 'STATUS'}
+  >>> STATUS.to_primitive()
+  {'name': 'STATUS', 'items': [{'name': 'SUCCESS'}, {'name': 'FAILURE'}]}
 
-By default ``to_primitive()`` returns a :class:`dict` which contains at least
-a ``name``. In addition, containers have :class:`list` of their ``items``.
+  >>> STATUS.SUCCESS.to_primitive()
+  {'name': 'SUCCESS'}
 
-Verbose constants
-~~~~~~~~~~~~~~~~~
 
-:ref:`Verbose constants <usage_verbose_constants>` work same way::
+Same for constants with values:
 
-    >>> TYPES.FOO.to_primitive()
-    {'help_text': 'help', 'verbose_name': 'Some foo constant', 'name': 'FOO'}
+.. code-block:: python
 
-Valued constants
-~~~~~~~~~~~~~~~~
-
-You can do that with :ref:`valued constants <usage_valued_constants>` as well::
-
-    >>> TEAMS.RED.to_primitive()
-    {'name': 'RED', 'value': '#F00'}
+  >>> TEAMS.RED.to_primitive()
+  {'name': 'RED', 'value': '#F00'}
 
 .. note::
 
-    Remember: values of constants are out of scope of this library.
+  Actual values of constants are out of scope of this library.
 
-    You can use anything as value of your constants, but converting values into
-    primitives is almost up to you.
+  Any value can be used as a value of constants, but converting values into primitives is almost up to the user.
 
-    If your value is ``callable``, ``candv`` will call it to get it's value.
-    If your value has ``isoformat()`` method (``date``, ``time``, etc.),
-    ``candv`` will call it either. Everything else is supposed to be a
-    primitive.
+  If a given value is a ``callable`` (e.g., it's a lazy translation string), ``candv`` will call it to get it's value.
 
-    It is unlikely that you will use something complex, but if you will, than
-    it's strongly recommended to implement
-    :ref:`a custom constant class <customization>` with
-    :ref:`custom support of exporting <customization_exporting>`.
+  If it has ``to_primitive(*args, **kwargs)`` method, again, ``candv`` will call it.
 
-Hierarchies
-~~~~~~~~~~~
+  If it has ``isoformat()`` method (it's a ``date``, ``time``, etc.), ``candv`` will call it either.
 
-Hierarchies can be converted to primitives also::
+  Everything else is expected to be a primitive by itself. Otherwise, it's recommended to implement :ref:`a custom constant class <customization>` with :ref:`custom conversion to primitives <customization_to_primitives>`.
 
-    >>> class FOO(Constants):
-    ...     A = SimpleConstant()
-    ...     B = VerboseValueConstant(
-    ...         value=10,
-    ...         verbose_name="Constant B",
-    ...         help_text="Just a group with verbose name"
-    ...     ).to_group(
-    ...         group_class=Constants,
-    ...         C=SimpleConstant(),
-    ...         D=SimpleConstant(),
-    ...     )
-    ...
-    >>> from pprint import pprint
-    >>> pprint(FOO.B.to_primitive())
-        {'help_text': 'Just a group with verbose name',
-         'items': [{'name': 'C'}, {'name': 'D'}],
-         'name': 'B',
-         'value': 10,
-         'verbose_name': 'Constant B'}
 
-As you can see, result is a mix of constant and container.
+For verbose constants:
+
+.. code-block:: python
+
+  >>> Countries.au.to_primitive()
+  {'name': 'au', 'verbose_name': 'Australia', 'help_text': None}
+
+
+For verbose constants with values:
+
+.. code-block:: python
+
+  >>> SkillLevel.ace.to_primitive()
+  {'name': 'ace', 'value': 3, 'verbose_name': 'ace', 'help_text': None}
+
+
+And for hierarchies:
+
+.. code-block:: python
+
+  >>> TREE.to_primitive()
+  {'name': 'TREE', 'items': [{'name': 'LEFT', 'items': [{'name': 'LEFT'}, {'name': 'RIGHT'}]}, {'name':   'RIGHT', 'items': [{'name': 'LEFT'}, {'name': 'RIGHT'}]}]}
+
+  >>> TREE.LEFT.to_primitive()
+  {'name': 'LEFT', 'items': [{'name': 'LEFT'}, {'name': 'RIGHT'}]}
+
+  >>> TREE.LEFT.LEFT.to_primitive()
+  {'name': 'LEFT'}
+
+
+Using with django
+-----------------
+
+It's possible to use verbose constants and verbose constants with values as ``choices`` in ``djnago`` models. See `django-candv-choices`_ details.
+
+Additionally, see `django-rf-candv-choices`_ for using as ``choices`` in ``django-rest-framework``.
+
+
+.. _verboselib: https://github.com/oblalex/verboselib
+.. _Django translation strings: https://docs.djangoproject.com/en/3.1/topics/i18n/translation/
+.. _django-candv-choices: https://github.com/oblalex/django-candv-choices
+.. _django-rf-candv-choices: https://github.com/oblalex/django-rf-candv-choices

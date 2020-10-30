@@ -1,41 +1,16 @@
-candv: Constants & Values
-=========================
+.. _brief-overview:
 
-|pypi_package| |python_versions| |docs| |license|
+Brief Overview
+==============
 
-|unix_build| |windows_build| |codebeat| |codacy| |scrutinizer|
-
-
-``candv`` allows to create complex enum-like constants.
-
-In contrast to other methods of defining constants, ``candv`` helps to organize and to document classes of constants.
-
-This is done by providing iteration and lookup facilities for containers of constants.
-
-Additionally, ``candv`` provides an ability to attach human-readable names, descriptions, arbitrary values, and methods to constants.
-
-Inspired by `Constants from Twisted`_ and `Form Fields from Django`_.
-
-
-Installation
-------------
-
-Available as a `PyPI <https://pypi.python.org/pypi/candv>`_ package:
-
-.. code-block:: bash
-
-  pip install candv
-
-
-Brief overview
---------------
-
-The most basic definition of constants:
+The most basic definition of :ref:`simple constants <usage_simple_constants>`:
 
 .. code-block:: python
+  :linenos:
 
   from candv import Constants
   from candv import SimpleConstant
+
 
   class TEAM(Constants):
     RED  = SimpleConstant()
@@ -45,6 +20,8 @@ The most basic definition of constants:
 And usage:
 
 .. code-block:: python
+  :linenos:
+  :lineno-start: 8
 
   TEAM.RED                 # <constant 'TEAM.RED'>
   TEAM['RED']              # <constant 'TEAM.RED'>
@@ -73,12 +50,14 @@ And usage:
   TEAM.to_primitive()      # {'name': 'TEAM', 'items': [{'name': 'RED'}, {'name': 'BLUE'}]}
 
 
-Using with values:
+Using :ref:`with values <usage_valued_constants>`:
 
 .. code-block:: python
+  :linenos:
 
   from candv import Values
   from candv import ValueConstant
+
 
   class TEAM(Values):
     RED  = ValueConstant(1)
@@ -95,12 +74,14 @@ Using with values:
   TEAM.RED.to_primitive()  # {'name': 'RED', 'value': 1}
 
 
-Using with human-readable names:
+Using :ref:`with human-readable names <usage_verbose_constants>`:
 
 .. code-block:: python
+  :linenos:
 
   from candv import Constants
   from candv import VerboseConstant
+
 
   class Countries(Constants):
     au = VerboseConstant("Australia")
@@ -117,9 +98,11 @@ Using with human-readable names:
 With values and names:
 
 .. code-block:: python
+  :linenos:
 
   from candv import Values
   from candv import VerboseValueConstant
+
 
   class SkillLevel(Values):
     rki = VerboseValueConstant(0, "rookie")
@@ -139,6 +122,7 @@ With values and names:
 Plays well with verboselib_ or, say, `Django translation strings`_:
 
 .. code-block:: python
+  :linenos:
 
   from candv import Constants
   from candv import VerboseConstant
@@ -160,12 +144,14 @@ Plays well with verboselib_ or, say, `Django translation strings`_:
     vehicle  = VerboseConstant(_("vehicle"))
 
 
-Supports custom methods:
+Supports :ref:`custom methods <customization>`:
 
 .. code-block:: python
+  :linenos:
 
   from candv import Constants
   from candv import SimpleConstant
+
 
   class SupportedLanguages(Constants):
     en = SimpleConstant()
@@ -179,16 +165,19 @@ Supports custom methods:
   SupportedLanguages.get_default()  # <constant 'SupportedLanguages.en'>
 
 
-And custom types of constants:
+And :ref:`custom types of constants <customization>`:
 
 .. code-block:: python
+  :linenos:
 
   from candv import Constants
   from candv import SimpleConstant
   from candv import with_constant_class
 
+
   class MissionStatus(SimpleConstant):
     ...
+
 
   class MissionStatuses(with_constant_class(MissionStatus), Constants):
     not_loaded = MissionStatus()
@@ -196,12 +185,14 @@ And custom types of constants:
     playing    = MissionStatus()
 
 
-It's also possible to define hierarchies:
+It's also possible to define :ref:`hierarchies <hierarchies>`:
 
 .. code-block:: python
+  :linenos:
 
   from candv import Constants
   from candv import SimpleConstant
+
 
   class STATUS(Constants):
     SUCCESS = SimpleConstant()
@@ -221,57 +212,5 @@ It's also possible to define hierarchies:
   STATUS.ERROR.names()             # ['INVALID', 'NOT_FOUND', 'INTERNAL']
 
 
-More info
----------
-
-Visit `the docs`_ for full information.
-
-See `django-candv-choices`_ for using as ``choices`` in ``django``.
-
-See `django-rf-candv-choices`_ for using as ``choices`` in ``django-rest-framework``.
-
-
-
-.. |unix_build| image:: http://img.shields.io/travis/oblalex/candv.svg?branch=master&style=flat
-   :target: https://travis-ci.org/oblalex/candv
-
-.. |windows_build| image:: https://ci.appveyor.com/api/projects/status/9ll29jta8sqtve91/branch/master?svg=true
-    :target: https://ci.appveyor.com/project/oblalex/candv/branch/master
-    :alt: Build status of the master branch on Windows
-
-.. |pypi_package| image:: https://img.shields.io/pypi/v/candv
-   :target: http://badge.fury.io/py/candv/
-   :alt: Version of PyPI package
-
-.. |python_versions| image:: https://img.shields.io/badge/Python-3.7,3.8-brightgreen.svg
-   :alt: Supported versions of Python
-
-.. |docs| image:: https://readthedocs.org/projects/candv/badge/?version=latest
-   :target: docs_
-   :alt: Documentation Status
-
-.. |license| image:: https://img.shields.io/badge/license-MIT-blue.svg
-   :target: https://github.com/oblalex/candv/blob/master/LICENSE
-   :alt: MIT license
-
-.. |codebeat| image:: https://codebeat.co/badges/270255bd-0a59-4f53-b91a-13bda8352bcf
-   :target: https://codebeat.co/projects/github-com-oblalex-candv-master
-   :alt: Code quality provided by «Codebeat»
-
-.. |codacy| image:: https://app.codacy.com/project/badge/Grade/6cd7b783d9604e2195ab854733bdc806
-   :target: https://www.codacy.com/gh/oblalex/candv/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=oblalex/candv&amp;utm_campaign=Badge_Grade
-   :alt: Code quality provided by «Codacy»
-
-.. |scrutinizer| image:: https://scrutinizer-ci.com/g/oblalex/candv/badges/quality-score.png?b=master
-   :target: https://scrutinizer-ci.com/g/oblalex/candv/?branch=master
-   :alt: Code quality provided by «Scrutinizer CI»
-
-
-.. _Constants from Twisted: http://twistedmatrix.com/documents/current/core/howto/constants.html
-.. _Form Fields from Django: https://docs.djangoproject.com/en/3.1/ref/forms/fields/
-.. _the docs:
-.. _docs: http://candv.readthedocs.org/en/latest/
 .. _verboselib: https://github.com/oblalex/verboselib
 .. _Django translation strings: https://docs.djangoproject.com/en/3.1/topics/i18n/translation/
-.. _django-candv-choices: https://github.com/oblalex/django-candv-choices
-.. _django-rf-candv-choices: https://github.com/oblalex/django-rf-candv-choices

@@ -1,6 +1,8 @@
 [run]
 source = candv
-omit = */tests/*
+omit =
+    */tests/*
+    candv/version.py
 
 [report]
 exclude_lines =

@@ -3,223 +3,317 @@
 Customization
 =============
 
-If all you've seen before is not enough for you, then you can create your own
-constants and containers for them. Let's see some examples.
+It is possible to create custom classes of constant and of containers if standard functionality is not enough.
 
 
-Custom constants
-----------------
+Custom definitions
+------------------
 
-Imagine you need to create some constant class. For example, you need to define
-some operation codes and have ability to create come commands with arguments::
+There are several reasons why one would need to create a custom class of constants. For example:
 
-    >>> from candv import ValueConstant
-    >>> class Opcode(ValueConstant):
-    ...     def compose(self, *args):
-    ...         chunks = [self.value, ]
-    ...         chunks.extend(args)
-    ...         return '/'.join(map(str, chunks))
+* A need to vividly define a type of constants tracked by a certain container.
+* A need to add extra methods to constants.
+* A need to add extra attributes to constants.
+
+
+Custom constants can be created simply by subclassing one of existing classes of constants, e.g.:
+
+.. code-block:: python
+  :linenos:
+
+  from candv import SimpleConstant
+
+  class SupportedLanguage(SimpleConstant):
     ...
 
-So, just a class with a method. Nothing special. You can use it right now::
 
-    >>> from candv import Values
-    >>> class OPERATIONS(Values):
-    ...     REQ = Opcode(100)
-    ...     ACK = Opcode(200)
-    ...
-    >>> OPERATIONS.REQ.compose(1, 2, 3, 4, 5)
-    '100/1/2/3/4/5'
+Here, ``SupportedLanguage`` is quite ready to be used, e.g.:
+
+.. code-block:: python
+  :linenos:
+  :lineno-start: 5
+
+  from candv import Constants
 
 
-Adding support of groups
-------------------------
+  class SupportedLanguages(Constants):
+    en = SupportedLanguage()
+    fr = SupportedLanguage()
 
-Well, everything looks fine. But what about creating a group from our new
-constants?
 
-.. note:: If you don't know what this means, see :ref:`hierarchies`.
+Despite ``SupportedLanguages`` is a valid container, it does not enforce which constants are its valid members. For example, it's still possible to use other constants:
 
-So, firstly, let's create some constant::
+.. code-block:: python
+  :linenos:
+  :lineno-start: 11
 
-    >>> class FOO(Values):
-    ...     BAR = Opcode(300).to_group(Values,
-    ...         BAZ = Opcode(301),
-    ...     )
+  class SupportedLanguages(Constants):
+    en = SupportedLanguage()
+    fr = SupportedLanguage()
 
-And now let's check it:
+    xx = SimpleConstant()
 
-    >>> FOO.BAR.compose(1, 2, 3)
-    Traceback (most recent call last):
-      File "<input>", line 1, in <module>
-    AttributeError: 'FOO.BAR' object has no attribute 'compose'
-    >>> FOO.BAR.BAZ.compose(4, 5, 6)
-    '301/4/5/6'
 
-Oops! Our newborn group does not have a ``compose`` method. Don't give up!
-We will add it easily, but in a special manner. Let's redefine our ``Opcode``
-class::
+Here, all constants will be visible to the container:
 
-    >>> class Opcode(ValueConstant):
-    ...     def compose(self, *args):
-    ...         chunks = [self.value, ]
-    ...         chunks.extend(args)
-    ...         return '/'.join(map(str, chunks))
-    ...     def merge_into_group(self, group):
-    ...         super(Opcode, self).merge_into_group(group)
-    ...         group.compose = self.compose
-    ...
-    >>> class FOO(Values):
-    ...     BAR = Opcode(300).to_group(Values,
-    ...         BAZ = Opcode(301),
-    ...     )
-    ...
-    >>> FOO.BAR.compose(1, 2, 3)
-    '300/1/2/3'
+.. code-block:: python
+  :linenos:
+  :lineno-start: 16
 
-Here the key point is ``merge_into_group`` method, which redefines
-:meth:`candv.base.Constant.merge_into_group`. Firstly, it calls method of the
-base class, so that internal mechanisms can be initialized. Then it sets a
-new attribute ``compose`` which is a reference to ``compose`` method of our
-``Opcode`` class.
+  >>> SupportedLanguages.names()
+  ['en', 'fr', 'xx']
 
-.. note::
 
-    Be careful with attaching methods of existing objects to another objects.
-    Maybe it will be better for you to use some *lambda* or to define some
-    method within ``merge_into_group``.
+If a container has methods relying on custom attributes of its members, such behavior might become troublesome.
 
-.. _customization_exporting:
+One should specify ``constant_class`` attribute in order to explicitly define constants supported by a container. So, a bit more correct definition would be:
 
-Adding support of exporting
----------------------------
+.. code-block:: python
+  :linenos:
+  :lineno-start: 18
+  :emphasize-lines: 2
 
-If your constant stores some complex objects, then it's strongly recommended
-to provide support of exporting for them (see :ref:`usage_exporting`).
+  class SupportedLanguages(Constants):
+    constant_class = SupportedLanguage
 
-Do do that, you need to define ``to_primitive()`` method for your class.
-Example::
+    en = SupportedLanguage()
+    fr = SupportedLanguage()
 
-    >>> from fractions import Fraction
-    >>> from pprint import pprint
-    >>> from candv import SimpleConstant, Constants
-    >>>
-    >>> class FractionConstant(SimpleConstant):
-    ...     def __init__(self, value):
-    ...         super(FractionConstant, self).__init__()
-    ...         self.value = value
-    ...
-    ...     def to_primitive(self, context=None):
-    ...         primitive = super(FractionConstant, self).to_primitive(context)
-    ...         primitive.update({
-    ...                'numerator': self.value.numerator,
-    ...                'denominator': self.value.denominator
-    ...         })
-    ...         return primitive
-    ...
-    >>> class Fractions(Constants):
-    ...     one_half = FractionConstant(Fraction(1, 2))
-    ...     one_third = FractionConstant(Fraction(1, 3))
-    ...
-    >>> Fractions.one_half.to_primitive()
-    {'denominator': 2, 'numerator': 1, 'name': 'one_half'}
-    >>> pprint(Fractions.to_primitive())
-    {'items': [{'denominator': 2, 'name': 'one_half', 'numerator': 1},
-               {'denominator': 3, 'name': 'one_third', 'numerator': 1}],
-     'name': 'Fractions'}
 
-.. note::
+As a result, any constants except ``SupportedLanguage`` and its derivatives will be ignored:
 
-    This example is quite hypothetical and it's intended just to show
-    implementation of custom ``to_primitive()`` method.
+.. code-block:: python
+  :linenos:
+  :lineno-start: 23
 
-The plot in a nutshell:
+  class SupportedLanguages(Constants):
+    constant_class = SupportedLanguage
 
-    #. Define ``to_primitive()`` method which accepts ``context`` argument.
-    #. Call parent's method and get primitive.
-    #. Update that primitive with your data, which may depend on context.
-    #. Return updated primitive.
+    en = SupportedLanguage()
+    fr = SupportedLanguage()
 
-Same can be applied to :ref:`custom constant containers <custom_containers>`
-as well.
+    xx = SimpleConstant()
+
+
+.. code-block:: python
+  :linenos:
+  :lineno-start: 30
+
+  >>> SupportedLanguages.names()
+  ['en', 'fr']
+
+
+As definitions of the ``constant_class`` attribute may clutter definitions of classes, it's possible to lift them out of class bodies using a helper :meth:`~candv.with_constant_class`:
+
+.. code-block:: python
+  :linenos:
+  :lineno-start: 32
+  :emphasize-lines: 4
+
+  from candv import with_constant_class
+
+
+  class SupportedLanguages(with_constant_class(SupportedLanguage), Constants):
+    en = SupportedLanguage()
+    fr = SupportedLanguage()
+
+
+Of course, it's possible to add custom methods and attributes to both constants and containers.
+
+For example, the following constants allow formatting and parsing of operations having opcodes:
+
+.. code-block:: python
+  :linenos:
+  :emphasize-lines: 8-11,18-23
+
+  from candv import ValueConstant
+  from candv import Values
+  from candv import with_constant_class
+
+
+  class Opcode(ValueConstant):
+
+    def compose(self, *args):
+      chunks = [self.value, ]
+      chunks.extend(args)
+      return '/'.join(map(str, chunks))
+
+
+  class OPERATIONS(with_constant_class(Opcode), Values):
+    REQ = Opcode(100)
+    ACK = Opcode(200)
+
+    @classmethod
+    def decompose(cls, value):
+      chunks = value.split('/')
+      opcode = int(chunks.pop(0))
+      constant = cls.get_by_value(opcode)
+      return constant, chunks
+
+
+Example usage of such constants is defined as follows.
+
+.. code-block:: python
+  :linenos:
+  :lineno-start: 24
+
+  >>> OPERATIONS.ACK.compose(1, 2, 'foo')
+  '200/1/2/foo'
+
+  >>> OPERATIONS.decompose('200/1/2/foo')
+  (<constant 'OPERATIONS.ACK'>, ['1', '2', 'foo'])
+
+
+The point here is to show that it is possible to add arbitrary attributes and logic to constants if really needed.
 
 
 Adding verbosity
 ----------------
 
-If you need to add verbosity to your constants, just use
-:class:`~candv.VerboseMixin` mixin as the first base of your own class::
+If custom constants need to have human-friendly attributes provided by :class:`~candv.VerboseConstant`, they can be added by :class:`~candv.VerboseMixin`:
 
-    >>> from candv import VerboseMixin, SimpleConstant
-    >>> class SomeConstant(VerboseMixin, SimpleConstant):
-    ...     def __init__(self, arg1, agr2, verbose_name=None, help_text=None):
-    ...         super(SomeConstant, self).__init__(verbose_name=verbose_name,
-    ...                                            help_text=help_text)
-    ...         self.arg1 = arg1
-    ...         self.arg2 = arg2
-    ...
+.. code-block:: python
+  :linenos:
 
-.. note::
-
-    Here note, that during call of ``__init__`` method of the super class, you
-    need to pass ``verbose_name`` and ``help_text`` as keyword arguments.
+  from candv import SimpleConstant
+  from candv import VerboseMixin
 
 
-.. _custom_containers:
+  class CustomConstant(VerboseMixin, SimpleConstant):
 
-Custom containers
------------------
-
-To define own container, just derive new class from existing containers, e.g.
-from :class:`~candv.Constants` or :class:`~candv.Values`::
-
-    >>> class FOO(Values):
-    ...     constant_class = Opcode
-    ...
-    ...     @classmethod
-    ...     def compose_all(cls, *args):
-    ...         return '!'.join(map(lambda x: x.compose(*args), cls.constants()))
-    ...
-
-Here ``constant_class`` attribute defines top-level class of constants.
-Instances whose class is more general than ``constant_class`` will be invisible
-to container (see :attr:`~candv.base.ConstantsContainer.constant_class`). Our
-new method ``compose_all`` just joins compositions of all its opcodes.
+      def __init__(self, arg1, agr2, verbose_name=None, help_text=None):
+        super().__init__(
+          verbose_name=verbose_name,
+          help_text=help_text,
+        )
+        self.arg1 = arg1
+        self.arg2 = arg2
 
 .. note::
 
-    Since *1.2.0* you can use :meth:`~candv.base.with_constant_class` mixin
-    factory to make definitions of your containers more readable, e.g.::
+  Here, ``verbose_name`` and ``help_text`` attributes must be passed as keyword arguments during ``super().__init__()`` call.
 
-        >>> from candv import with_constant_class
-        >>> class FOO(with_constant_class(Opcode), Values):
-        ...
-        ...     @classmethod
-        ...     def compose_all(cls, *args):
-        ...         return '!'.join(map(lambda x: x.compose(*args), cls.constants()))
-        ...
 
-    This will produce the same class as above.
+.. _customization_to_primitives:
 
-Now it's time to use new container::
+Custom conversion to primitives
+-------------------------------
 
-    >>> class BAR(FOO):
-    ...     REQ = Opcode(1)
-    ...     ACK = Opcode(2)
-    ...
-    ...     @classmethod
-    ...     def decompose(cls, value):
-    ...         chunks = value.split('/')
-    ...         opcode = int(chunks.pop(0))
-    ...         constant = cls.get_by_value(opcode)
-    ...         return constant, chunks
+Custom constants which have complex attributes may need to define custom logic for converting their attributes into primitives. This is primarily needed for serialization, say, into JSON.
 
-Here we add new method ``decompose`` which takes a string and decomposes it
-into tuple of opcode constant and its arguments. Let's test our conainer::
+One has to override ``to_primitive()`` method to define custom conversion logic. For example:
 
-    >>> BAR.compose_all(500, 600, 700)
-    '1/500/600/700!2/500/600/700'
-    >>> BAR.decompose('1/100/200')
-    (<constant 'BAR.REQ'>, ['100', '200'])
+.. code-block:: python
+  :linenos:
+  :emphasize-lines: 15-21
 
-Seems to be OK.
+  from fractions import Fraction
+  from pprint import pprint
+
+  from candv import Constants
+  from candv import SimpleConstant
+  from candv import with_constant_class
+
+
+  class FractionConstant(SimpleConstant):
+
+    def __init__(self, value):
+      super().__init__()
+      self.value = value
+
+    def to_primitive(self, context=None):
+      primitive = super().to_primitive(context)
+      primitive.update({
+        'numerator':   self.value.numerator,
+        'denominator': self.value.denominator
+      })
+      return primitive
+
+
+  class Fractions(with_constant_class(FractionConstant), Constants):
+    one_half  = FractionConstant(Fraction(1, 2))
+    one_third = FractionConstant(Fraction(1, 3))
+
+.. code-block:: python
+  :linenos:
+  :lineno-start: 26
+
+  >>> Fractions.one_half.to_primitive()
+  {'name': 'one_half', 'numerator': 1, 'denominator': 2}
+
+  >>> pprint(Fractions.to_primitive())
+  {'items': [{'denominator': 2, 'name': 'one_half', 'numerator': 1},
+             {'denominator': 3, 'name': 'one_third', 'numerator': 1}],
+   'name': 'Fractions'}
+
+
+The plot in a nutshell:
+
+  #. Define ``to_primitive()`` method which accepts an optional ``context`` argument.
+  #. Call parent's method and get a primitive.
+  #. Update that primitive with custom data which may depend on the context.
+  #. Return the updated primitive.
+
+
+The same can be applied to :ref:`custom constant containers <custom_containers>`
+as well.
+
+
+Hierarchies
+-----------
+
+Hierarchies are made by creating groups from constants objects. Since groups are created dynamically, original attributes and methods of constants have to be supplied to groups.
+
+This can be done by overriding :meth:`~candv.SimpleConstant.merge_into_group` method. For example:
+
+.. code-block:: python
+  :linenos:
+  :emphasize-lines: 13-15
+
+  from candv import Values
+  from candv import ValueConstant
+
+
+  class Opcode(ValueConstant):
+
+    # custom method that also needs to be available in groups
+    def compose(self, *args):
+      chunks = [self.value, ]
+      chunks.extend(args)
+      return '/'.join(map(str, chunks))
+
+    def merge_into_group(self, group):
+      super().merge_into_group(group)
+      group.compose = self.compose
+
+
+.. code-block:: python
+  :linenos:
+  :lineno-start: 16
+
+  class FOO(Values):
+    BAR = Opcode(300).to_group(Values,
+      BAZ = Opcode(301),
+    )
+
+
+.. code-block:: python
+  :linenos:
+  :lineno-start: 20
+
+  >>> FOO.BAR.compose(1, 2, 3)
+  '300/1/2/3'
+
+  >>> FOO.BAR.BAZ.compose(5, 6)
+  '301/5/6'
+
+Here, the overridden method :meth:`~candv.SimpleConstant.merge_into_group` calls the original method of the
+base class and adds a new ``compose`` attribute to the group.
+
+In this simple case the attribute is a reference to the ``compose()`` method of the custom ``Opcode`` class.
+
+.. warning::
+
+  Attaching methods of existing objects to another objects can be not a good idea.
+
+  Consider using method factories or at least lambdas.
