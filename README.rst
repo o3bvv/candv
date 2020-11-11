@@ -243,7 +243,7 @@ See `django-rf-candv-choices`_ for using as ``choices`` in ``django-rest-framewo
    :target: http://badge.fury.io/py/candv/
    :alt: Version of PyPI package
 
-.. |python_versions| image:: https://img.shields.io/badge/Python-3.7,3.8-brightgreen.svg
+.. |python_versions| image:: https://img.shields.io/badge/Python-3.7+-brightgreen.svg
    :alt: Supported versions of Python
 
 .. |docs| image:: https://readthedocs.org/projects/candv/badge/?version=latest
