@@ -3,7 +3,7 @@ candv: Constants & Values
 
 |pypi_package| |python_versions| |docs| |license|
 
-|unix_build| |windows_build| |codebeat| |codacy| |scrutinizer|
+|linux_build| |windows_build| |coverage| |codebeat| |codacy| |scrutinizer|
 
 
 ``candv`` allows to create complex enum-like constants.
@@ -231,14 +231,6 @@ See `django-candv-choices`_ for using as ``choices`` in ``django``.
 See `django-rf-candv-choices`_ for using as ``choices`` in ``django-rest-framework``.
 
 
-
-.. |unix_build| image:: http://img.shields.io/travis/oblalex/candv.svg?branch=master&style=flat
-   :target: https://travis-ci.org/oblalex/candv
-
-.. |windows_build| image:: https://ci.appveyor.com/api/projects/status/9ll29jta8sqtve91/branch/master?svg=true
-    :target: https://ci.appveyor.com/project/oblalex/candv/branch/master
-    :alt: Build status of the master branch on Windows
-
 .. |pypi_package| image:: https://img.shields.io/pypi/v/candv
    :target: http://badge.fury.io/py/candv/
    :alt: Version of PyPI package
@@ -253,6 +245,17 @@ See `django-rf-candv-choices`_ for using as ``choices`` in ``django-rest-framewo
 .. |license| image:: https://img.shields.io/badge/license-MIT-blue.svg
    :target: https://github.com/oblalex/candv/blob/master/LICENSE
    :alt: MIT license
+
+.. |linux_build| image:: http://img.shields.io/travis/oblalex/candv.svg?branch=master&style=flat
+   :target: https://travis-ci.org/oblalex/candv
+
+.. |windows_build| image:: https://ci.appveyor.com/api/projects/status/9ll29jta8sqtve91/branch/master?svg=true
+   :target: https://ci.appveyor.com/project/oblalex/candv/branch/master
+   :alt: Build status of the master branch on Windows
+
+.. |coverage| image:: https://scrutinizer-ci.com/g/oblalex/candv/badges/coverage.png?b=master
+   :target: https://scrutinizer-ci.com/g/oblalex/candv/?branch=master
+   :alt: Code coverage
 
 .. |codebeat| image:: https://codebeat.co/badges/270255bd-0a59-4f53-b91a-13bda8352bcf
    :target: https://codebeat.co/projects/github-com-oblalex-candv-master
