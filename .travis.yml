@@ -1,16 +1,15 @@
+os:
+  - "linux"
+sudo: false
 language: python
 python:
-  - '3.7'
-  - '3.8'
-  - '3.9'
+  - "3.7"
+  - "3.8"
+  - "3.9"
 install:
   - pip install -r ./requirements/ci.txt
-  - pip install -e .
+  - pip install .
 script:
-  - py.test
-after_success:
-  - coveralls
+  - py.test --verbose ./candv ./tests --cov ./candv ./tests
 notifications:
   email: false
-  slack:
-    secure: hGenGD+92poJI7cZXqxxtZtAK2f7UUw+0V2QpqCoch9FG1zhYom+12//KXQNSqPZbTjryCILO9gfFWvU3Pq51DS+G9VjSqszUcD3tOLGxPPI7lxD1RnBVz1g+ju247SDEbya6XareIEqdf+27IYxASLOg7yI+h6yEC2UTDaqBiM=
