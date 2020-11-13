@@ -3,7 +3,7 @@ candv: Constants & Values
 
 |pypi_package| |python_versions| |docs| |license|
 
-|linux_build| |windows_build| |coverage| |codebeat| |codacy| |scrutinizer|
+|linux_build| |windows_build| |codebeat| |codacy| |scrutinizer|
 
 
 ``candv`` allows to create complex enum-like constants.
@@ -140,7 +140,7 @@ Indices and tables
    :alt: Supported versions of Python
 
 .. |docs| image:: https://readthedocs.org/projects/candv/badge/?version=latest
-   :target: docs_
+   :target: http://candv.rtfd.io/
    :alt: Documentation Status
 
 .. |license| image:: https://img.shields.io/badge/license-MIT-blue.svg
@@ -154,10 +154,6 @@ Indices and tables
 .. |windows_build| image:: https://ci.appveyor.com/api/projects/status/9ll29jta8sqtve91/branch/master?svg=true
    :target: https://ci.appveyor.com/project/oblalex/candv/branch/master
    :alt: Build status of the master branch on Windows
-
-.. |coverage| image:: https://scrutinizer-ci.com/g/oblalex/candv/badges/coverage.png?b=master
-   :target: https://scrutinizer-ci.com/g/oblalex/candv/?branch=master
-   :alt: Code coverage
 
 .. |codebeat| image:: https://codebeat.co/badges/270255bd-0a59-4f53-b91a-13bda8352bcf
    :target: https://codebeat.co/projects/github-com-oblalex-candv-master
