@@ -102,9 +102,12 @@ class SimpleConstant:
     )
     return f"{prefix}.{self.name}"
 
-  def to_primitive(self, context=None):
+  def to_primitive(self, *args, **kwargs):
     """
     Represent the constant via Python's primitive data structures.
+
+    .. versionchanged:: 1.5.0
+       The ``context`` param is replaced by ``*args`` and ``**kwargs``.
 
     .. versionadded:: 1.3.0
 
@@ -185,9 +188,9 @@ class _LazyConstantsGroup:
     constant_primitive = constant.to_primitive
     group_primitive = group.to_primitive
 
-    def to_primitive(self, context=None):
-      primitive = constant_primitive(context)
-      primitive.update(group_primitive(context))
+    def to_primitive(self, *args, **kwargs):
+      primitive = constant_primitive(*args, **kwargs)
+      primitive.update(group_primitive(*args, **kwargs))
       return primitive
 
     return types.MethodType(to_primitive, group)
@@ -494,12 +497,16 @@ class _ConstantsContainerMeta(type):
   #: values.
   itervalues = iterconstants
 
-  def to_primitive(self, context=None):
+  def to_primitive(self, *args, **kwargs):
     """
+    .. versionchanged:: 1.5.0
+       The ``context`` param is replaced by ``*args`` and ``**kwargs``.
+
     .. versionadded:: 1.3.0
+
     """
     items = [
-      x.to_primitive(context)
+      x.to_primitive(*args, **kwargs)
       for x in self.iterconstants()
     ]
     return {

@@ -59,11 +59,15 @@ class VerboseMixin:
     group.verbose_name = self.verbose_name
     group.help_text = self.help_text
 
-  def to_primitive(self, context=None):
+  def to_primitive(self, *args, **kwargs):
     """
+    .. versionchanged:: 1.5.0
+       The ``context`` param is replaced by ``*args`` and ``**kwargs``.
+
     .. versionadded:: 1.3.0
+
     """
-    primitive = super().to_primitive(context)
+    primitive = super().to_primitive(*args, **kwargs)
     primitive.update({
       'verbose_name': (
         str(self.verbose_name)
@@ -117,18 +121,22 @@ class ValueConstant(SimpleConstant):
     super().merge_into_group(group)
     group.value = self.value
 
-  def to_primitive(self, context=None):
+  def to_primitive(self, *args, **kwargs):
     """
+    .. versionchanged:: 1.5.0
+       The ``context`` param is replaced by ``*args`` and ``**kwargs``.
+
     .. versionadded:: 1.3.0
+
     """
-    primitive = super().to_primitive(context)
+    primitive = super().to_primitive(*args, **kwargs)
     value = self.value
 
     if hasattr(value, "isoformat"):
       value = value.isoformat()
 
     if hasattr(value, "to_primitive"):
-      value = value.to_primitive(context)
+      value = value.to_primitive(*args, **kwargs)
 
     elif callable(value):
       value = value()
