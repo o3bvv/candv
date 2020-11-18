@@ -33,6 +33,12 @@ Contents
 Changelog
 =========
 
+* `1.5.0`_ (Nov 18, 2020)
+
+  API changes:
+
+  * ``to_primitive()`` methods use ``*args`` and ``**kwargs`` instead of the ``context`` param.
+
 * `1.4.0`_ (Oct 30, 2020)
 
   API changes: public API is not changed, however, the following internal changes are introduced:
@@ -175,6 +181,7 @@ Indices and tables
 .. _issue #1: https://github.com/oblalex/candv/issues/1
 .. _issue #11: https://github.com/oblalex/candv/issues/11
 
+.. _1.5.0: https://github.com/oblalex/candv/compare/v1.4.0...v1.5.0
 .. _1.4.0: https://github.com/oblalex/candv/compare/v1.3.1...v1.4.0
 .. _1.3.1: https://github.com/oblalex/candv/compare/v1.3.0...v1.3.1
 .. _1.3.0: https://github.com/oblalex/candv/compare/v1.2.0...v1.3.0

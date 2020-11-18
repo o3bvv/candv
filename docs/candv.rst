@@ -28,14 +28,6 @@ candv.ext module
    :undoc-members:
    :show-inheritance:
 
-candv.utils module
-------------------
-
-.. automodule:: candv.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 candv.version module
 --------------------
 

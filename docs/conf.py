@@ -9,8 +9,8 @@ sys.path.insert(0, os.path.abspath(".."))
 
 
 project = "candv"
-version = "1.4"
-release = "1.4.0"
+version = "1.5"
+release = "1.5.0"
 year = datetime.now().year
 copyright = f"{year}, Oleksandr Oblovatnyi"
 
@@ -53,6 +53,10 @@ todo_include_todos = True
 source_suffix = ".rst"
 master_doc = "index"
 
+autodoc_default_options = {
+  'member-order': 'bysource',
+}
+
 intersphinx_mapping = {
-  'https://docs.python.org/3': None,
+  "https://docs.python.org/3": None,
 }
