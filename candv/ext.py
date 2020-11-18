@@ -9,7 +9,7 @@ from .core import SimpleConstant
 
 from .exceptions import CandvValueNotFoundError
 
-from .utils import export
+from ._utils import export
 
 
 @export

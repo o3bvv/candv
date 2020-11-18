@@ -12,7 +12,7 @@ from .exceptions import CandvInvalidConstantClass
 from .exceptions import CandvInvalidGroupMemberError
 from .exceptions import CandvMissingConstantError
 
-from .utils import export
+from ._utils import export
 
 
 UNBOUND_CONSTANT_CONTAINER_NAME = "__UNBOUND__"
