@@ -33,7 +33,7 @@ Contents
 Changelog
 =========
 
-* `1.5.0`_ (pending)
+* `1.5.0`_ (Nov 18, 2020)
 
   API changes:
 
